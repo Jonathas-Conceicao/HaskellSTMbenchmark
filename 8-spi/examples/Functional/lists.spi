@@ -1,0 +1,40 @@
+(* Built-in list type *)
+(**********************)
+let map(f:proc('a,chan('b)),l:list('a),result:chan(list('b))) =
+  match l
+  case [] -> !result([])
+  case x::l -> (
+    new r:chan(list('a)) 
+    map(f,l,r); 
+    ?r(l');
+    ( new r:chan('a) 
+      f(x,r); 
+      ?r(m); 
+      !result(m::l')
+    )
+  )
+let member(x:'a,l:list('a),result:chan(bool)) =
+  match l
+  case [] -> !result(false)
+  case y::l -> 
+    if x=y 
+    then !result(true)
+    else member(x,l,result)
+
+let double(i:int,result:chan(int)) = !result(i*2)
+new result:chan(list(int))
+run 
+  map(double,1::2::3::4::[],result); 
+  ?result(l); 
+  println("map double 1::2::3::4::[] = " + show l);
+  ( new result:chan(bool) 
+      member(3,1::2::3::4::[],result); 
+      ?result(b); 
+      println("member 3 1::2::3::4::[] = " + show b);
+      member(5,1::2::3::4::[],result); 
+      ?result(b); 
+      println("member 5 1::2::3::4::[] = " + show b);
+      break()
+  )
+    
+

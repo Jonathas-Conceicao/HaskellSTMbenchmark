@@ -1,0 +1,88 @@
+==================
+Concurrent CHR 1.0
+==================
+
+This is the prototype of the concurrent constraint handling rule implementation in Haskell
+on Software transactional memory. Unfortunately it is still poorly documented, but we are
+working our best to fix that right now! 
+
+Note that CCHR is still experimental and is currently quite limited:
+
+      - No herbrand built-in constraints. 
+      - Rules are variable range restricted.
+      - Only allows simplification rules
+      - Primitive constraint store (Linked-list without any complex hash indexing.)
+
+For more information on CCHR, please visit:
+
+      http://www.comp.nus.edu.sg/~lamsoonl/cchr/
+
+==================
+Usage Instructions
+==================
+
+Here, we provide a step by step walk through on how to compile your own CCHR executables.
+Note that you will need a standard distribution of Glasgow Haskell Compiler (GHC) 6.6 in
+order for this to work.
+
+Step 1: CCHRCompiler
+====================
+
+First you'll need to build the CCHR compiler. This module translates CCHR syntax into
+Haskell programs.
+
+To do this, simply run:
+
+    CCHR1.0\ghc -fglasgow-exts -o CCHRComp ./CCHR/Control/*.hs --make ./CCHRCompiler/*.hs
+
+After this, you should have the executable CCHRComp in the CCHR1.0 sub-directory.
+
+Step 2: Compiling CCHR Programs
+===============================
+
+Now, you should be able to compile CCHR programs into Haskell. For instance, to compile the
+Gcd.cchr program, run:
+
+    CCHR1.0\CCHRComp Gcd.cchr
+
+This will produce the Haskell file Gcd.hs. All CCHR examples provided in this distribution
+can be compiled into executables. To do so (for example, Gcd.hs), run:
+
+    CCHR1.0\ghc +RTS -N2 -RTS -threaded -smp -fglasgow-exts --make ./Gcd.hs
+
+FYI: The additional GHC flags (+RTS -Nx -RTS -threaded -smp) makes the GHC symmetric 
+multi-processor (smp) support available for the Gcd compilation, where x is the no. of 
+processors. For more information on these flags check out: 
+
+    http://haskell.org/ghc/docs/6.6/html/users_guide/sec-using-smp.html
+
+Step 3: Using CCHR Programs
+===========================
+
+Now you probably have the Gcd executable. To run it, simply run:
+
+    CCHR1.0\Gcd t2
+
+The t2 argument indicates that we want to run the program with 2 solver threads, however,
+this does not mean the program will exploit smp support. For smp support run the following
+flags instead:
+
+    CCHR1.0\Gcd t2 +RTS -N2 -RTS -threaded -smp
+
+Step 4: Using CCHR Command Line Options:
+========================================
+
+The following briefly describe the basic solver flags provided by the CCHRCommandLine
+module:
+
+     tX        -- Run program with X solver threads.
+     bigStep   -- Run program with Big step search strategy. Overrides default small step search.
+     sameEntry -- Run program with all threads using the same search entry point. Overrides the
+                  default distinct entry. 
+     testSuite -- Run program test suites with the following test solver options:
+                       A    -- big step, same entry solver with 2, 8 and 16 threads.
+                       B    -- small step, same entry solver with 2, 8 and 16 threads.
+                       C    -- small step, distinct entry solver with 2, 8 and 16 threads.
+                       solo -- Single threaded solver.
+                  For instance, running Gcd with the full test suite and smp support:
+                       CCHR1.0\Gcd testSuite A B C solo +RTS -N2 -RTS -threaded -smp

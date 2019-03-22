@@ -1,0 +1,11 @@
+directive sample 5.0 10000
+directive plot Y()
+
+new c1@5.0:chan
+new c2@0.000625:chan (* 0.0025, 0.000625 *)
+let X() = ?c1; X()
+let Y() = 
+  do !c1; Y(); Y()
+  or !c2; ()
+  or ?c2; ()
+run (X() | 40 of Y()) (* (10,3000), (40,12000) *)

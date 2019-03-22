@@ -1,0 +1,12 @@
+#!/bin/bash
+rm *.o
+rm CCHR/*.o
+rm CCHRCompiler/*.o
+rm CCHR/Control/*.o
+
+for program in "Sudoku" "Gcd" "Unionfind" "Blockworld" "Prime"
+	do
+
+ghc-6.6.1 --make $program.hs -fglasgow-exts -threaded
+
+done

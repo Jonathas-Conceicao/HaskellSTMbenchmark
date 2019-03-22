@@ -1,0 +1,146 @@
+name Sudoku
+
+data SCell = SCell Int Int
+
+constraint Sudoku = Dom(SCell,[Int]) | Try(Int)
+
+rule Dom(SCell i j,[x]),Dom(SCell i k,ys) <==> (j /= k) && (elem x ys) && (ys /= []) | Dom(SCell i j,[x]),Dom(SCell i k,delete x ys)
+rule Dom(c1@(SCell j i),[x]),Dom(c2@(SCell k i),ys) <==> (j /= k) && (elem x ys) && (ys /= []) | Dom(c1,[x]),Dom(c2,delete x ys)
+rule Dom(c1@(SCell i j),[x]),Dom(c2@(SCell k l),ys) <==> (elem x ys) && (ys /= []) && (sameBlock (i,j) (k,l)) | Dom(c1,[x]),Dom(c2,delete x ys)
+
+rule Dom(_,[])  <==> False
+
+{
+--------------------------------------------------------------------------------
+--
+-- Copyright (C) 2006 
+--
+-- This program is free software; you can redistribute it and/or modify it
+-- under the terms of the GNU General Public License as published by the Free
+-- Software Foundation; either version 2 of the License, or (at your option)
+-- any later version. This program is distributed in the hope that it will be
+-- useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+-- See the GNU General Public License for more details.
+-- You should have received a copy of the GNU General Public License along
+-- with this program; if not, write to the Free Software Foundation, Inc.,
+-- 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+--
+--------------------------------------------------------------------------------
+
+import List
+
+import CCHR.CCHRCommandLine
+
+data SCell = SCell Int Int deriving Ord
+
+instance Eq SCell where
+   (SCell i j) == (SCell i' j') = (i==i') && (j==j')
+
+instance Show SCell where
+   show (SCell i j) = "x(" ++ (show i) ++ "," ++ (show j) ++ ")"
+
+instance Eq Sudoku where
+   Dom(s,is) == Dom(s',is') = (s==s') && (is==is')
+   _ == _ = False
+
+instance Show Sudoku where
+   show (Dom(x,is)) = "Dom(" ++ (show x) ++ "," ++ (show is) ++ ")"
+
+index :: [[a]] -> Int -> Int -> a
+index bs i j = (bs !! i) !! j
+
+set :: [[a]] -> Int -> Int -> a -> [[a]]
+set (as:ass) 0 j a = 
+         (set' as j a):ass
+         where
+            set' :: [a] -> Int -> a -> [a]
+            set' (a:as) 0 a' = a':as
+            set' (a:as) i a' = a:(set' as (i-1) a')
+            set' [] i a = []            
+set (as:ass) i j a = as:(set ass (i-1) j a)
+set [] i j a = [] 
+
+printSudoku :: [[Int]] -> IO ()
+printSudoku (as:ass) = do
+     printSudoku' as
+     --putStrLn ""
+     printSudoku ass
+     where
+        printSudoku' :: [Int] -> IO ()
+        printSudoku' (a:as) = do
+             putStr ((show a) ++ " ")
+             printSudoku' as
+        printSudoku' [] = putStrLn ""
+printSudoku [] = return ()
+
+testSudoku :: [[Int]]
+testSudoku = [
+              [3,0,8,0,0,5,0,1,0],
+              [2,0,0,9,0,0,3,7,4],
+              [6,0,0,0,0,0,2,0,5],
+              [5,0,0,8,0,3,0,0,9],
+              [0,0,3,0,9,0,8,0,0],
+              [7,0,0,5,0,4,0,0,3],
+              [8,0,6,0,0,0,0,0,1],
+              [1,4,5,0,0,8,0,0,2],
+              [0,3,0,1,0,0,4,0,8]
+             ]
+
+emptySudoku :: [[Int]]
+emptySudoku = [
+               [0,0,0,0,0,0,0,0,0],
+               [0,0,0,0,0,0,0,0,0],
+               [0,0,0,0,0,0,0,0,0],
+               [0,0,0,0,0,0,0,0,0],
+               [0,0,0,0,0,0,0,0,0],
+               [0,0,0,0,0,0,0,0,0],
+               [0,0,0,0,0,0,0,0,0],
+               [0,0,0,0,0,0,0,0,0],
+               [0,0,0,0,0,0,0,0,0]
+              ]
+
+internalize :: [[Int]] -> [Sudoku]
+internalize ss = let s1 = internalize' (ss !! 0) 0 0
+                     s2 = internalize' (ss !! 1) 1 0
+                     s3 = internalize' (ss !! 2) 2 0
+                     s4 = internalize' (ss !! 3) 3 0
+                     s5 = internalize' (ss !! 4) 4 0
+                     s6 = internalize' (ss !! 5) 5 0
+                     s7 = internalize' (ss !! 6) 6 0
+                     s8 = internalize' (ss !! 7) 7 0
+                     s9 = internalize' (ss !! 8) 8 0
+                 in s1 ++ s2 ++ s3 ++ s4 ++ s5 ++ s6 ++ s7 ++ s8 ++ s9
+                 where
+                    internalize' :: [Int] -> Int -> Int -> [Sudoku]
+                    internalize' (x:xs) i j = case x of
+                                                0 -> (Dom(SCell i j,[1..9])):(internalize' xs i (j+1))
+                                                _ -> (Dom(SCell i j,[x])):(internalize' xs i (j+1))
+                    internalize' [] _ _ = []
+
+sameBlock :: (Int,Int) -> (Int,Int) -> Bool
+sameBlock (i,j) (k,l) = 
+       case (i==k)&&(j==l) of
+          True  -> False
+          False -> (sameBlock' i k) && (sameBlock' j l)
+       where
+          sameBlock' :: Int -> Int -> Bool
+          sameBlock' i j = let di = i `div` 3
+                               dj = j `div` 3
+                           in (di == dj)
+
+externalize :: [Sudoku] -> [[Int]]
+externalize ss = externalize' emptySudoku ss
+                 where
+                   externalize' :: [[Int]] -> [Sudoku] -> [[Int]]
+                   externalize' exs (Dom(SCell i j,[x]):ss) = externalize' (set exs i j x) ss
+                   externalize' exs (_:ss) = externalize' exs ss
+                   externalize' exs [] = exs
+
+main :: IO ()
+main = do
+    putStrLn "Sudoku Problem:"
+    printSudoku testSudoku  
+    putStrLn ""  
+    runCommand (internalize testSudoku)
+}

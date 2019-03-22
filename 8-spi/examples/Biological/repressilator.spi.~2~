@@ -1,0 +1,31 @@
+(* Repressilator *)
+directive sample 100000.0 1000
+directive plot !x; !y; !z
+
+val transcribe = 0.1
+val degrade = 0.001
+val activate = 0.0001
+val bind = 1.0
+new x@bind:chan 
+new y@bind:chan
+new z@bind:chan
+
+let Protein(p:chan) = 
+  do !p; Protein(p)
+  or delay@degrade
+
+let Gate(a:chan,b:chan) = 
+  do delay@transcribe; Gate2(a,b)
+  or ?a; Gate3(a,b)
+(*
+new Gate:chan
+run (replicate ?Gate(a,b); 
+  do delay@transcribe; Gate2(a,b)
+  or ?a; Gate3(a,b)
+... and replace invocations of Gate with !Gate
+*)
+
+and Gate2(a:chan,b:chan) = (Protein(b) | Gate(a,b))
+and Gate3(a:chan,b:chan) = delay@activate; Gate(a,b)
+
+run ( Gate(x,y) | Gate(y,z) | Gate(z,x) )

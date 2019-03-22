@@ -1,0 +1,14 @@
+(* Na + Cl <==> Na+ + Cl- *)
+directive sample 0.03 1000
+directive plot Na(); Na_plus()
+
+new ionize@100.0 : chan
+new deionize@10.0 : chan
+let Na() = !ionize; Na_plus()
+and Na_plus() = ?deionize; Na()
+
+let Cl() = ?ionize; Cl_minus()
+and Cl_minus() = !deionize; Cl()
+
+run 100 of (Na() | Cl())
+

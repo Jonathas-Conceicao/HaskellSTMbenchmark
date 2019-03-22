@@ -1,0 +1,17 @@
+(* H + Cl <==> HCl *)
+directive sample 0.006 1000
+directive plot H(); H_Bound()
+
+new share@100.0:chan(chan)
+
+let H() = (
+   new e@10.0:chan
+  !share(e); H_Bound(e)
+)
+and H_Bound(e:chan) = ?e; H()
+
+let Cl() = ?share(e); Cl_Bound(e)
+and Cl_Bound(e:chan) =  !e; Cl()
+
+run 100 of (H() | Cl())
+

@@ -1,0 +1,25 @@
+(* Ethylene *)
+directive plot EthylR(); EthylP(); Ethylene()
+
+new empty@0.0:chan
+new alkene_Y@1.0:chan(chan)
+new alkene_R@10.0:chan(chan)
+new poly_R@1.0:chan(chan)
+
+let Y() = (new CC:chan !alkene_Y(CC); Y_bound(CC))
+and Y_bound(CC:chan) = ?empty
+
+let EthylP(CC_L:chan,CC_R:chan) = ?empty
+let End(CC_L:chan,CC_R:chan) = ?empty
+let EthylR(CC_L:chan) = (
+  new CC_R:chan
+  do !alkene_R(CC_R); EthylP(CC_L, CC_R)
+  or !poly_R(CC_R); End(CC_L, CC_R)
+  or ?poly_R(CC_R); End(CC_L, CC_R)
+)
+let Ethylene() = 
+  do ?alkene_Y(CC_L); EthylR(CC_L)
+  or ?alkene_R(CC_L); EthylR(CC_L)
+
+run 200 of Ethylene()
+run 4 of Y()

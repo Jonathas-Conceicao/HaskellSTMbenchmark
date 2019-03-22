@@ -1,0 +1,10 @@
+#!/bin/bash
+for numThreads in 1 #2 4 8
+	do
+# for((i=1 ; $i<=5 ; i=$(($i+1))));
+#		do
+		./Prime t$numThreads +RTS -N$numThreads -RTS 
+# tee -a "./prime results THREADS$numThreads"
+#		done			
+	done
+

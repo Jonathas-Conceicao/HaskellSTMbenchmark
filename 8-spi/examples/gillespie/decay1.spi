@@ -1,0 +1,6 @@
+directive sample 10.0
+directive plot X()
+
+val c = 0.5
+let X() = delay@c
+run 10000 of X() (* 1000, 5000, 10000 *)

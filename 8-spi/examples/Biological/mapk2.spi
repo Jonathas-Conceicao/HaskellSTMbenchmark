@@ -1,0 +1,83 @@
+(* Huang & Ferrell MAPK cascade *)
+directive sample 20.0
+directive plot KKK(); KKKst(); KK(); KK_PP(); KK_P(); K(); K_PP(); K_P()
+
+type Release = chan
+type Bond = chan(Release) 
+type React = chan
+
+new a1@1.0:Bond val d1=1.0 new k1@1.0:React
+new a2@1.0:Bond val d2=1.0 new k2@1.0:React
+new a3@1.0:Bond val d3=1.0 new k3@1.0:React
+new a4@1.0:Bond val d4=1.0 new k4@1.0:React
+new a5@1.0:Bond val d5=1.0 new k5@1.0:React
+new a6@1.0:Bond val d6=1.0 new k6@1.0:React
+new a7@1.0:Bond val d7=1.0 new k7@1.0:React
+new a8@1.0:Bond val d8=1.0 new k8@1.0:React
+new a9@1.0:Bond val d9=1.0 new k9@1.0:React
+new a10@1.0:Bond val d10=1.0 new k10@1.0:React
+
+let substrate (unbind:chan, Sub:proc(), react:chan, Product:proc()) =
+  do !unbind; Sub() 
+  or !react; Product()
+
+let enzyme (unbind:chan, react:chan, Enz:proc()) =
+  do ?unbind; Enz() 
+  or ?react; Enz()
+
+let KKK() = (
+  new u1@d1:Release 
+  !a1(u1); substrate(u1, KKK, k1, KKKst)
+)
+and KKKst() = (
+  new u2@d2:Release 
+  do !a2(u2); substrate(u2, KKKst, k2, KKK)	
+  or ?a3(u3); enzyme(u3, k3, KKKst)	
+  or ?a5(u5); enzyme(u5, k5, KKKst)
+)
+let E1() = ?a1(u1); enzyme(u1, k1, E1)
+let E2() = ?a2(u2); enzyme(u2, k2, E2)
+
+let KK() = (
+  new u3@d3:Release 
+  !a3(u3); substrate(u3, KK, k3, KK_P)
+)   
+and KK_P() = (
+  new u4@d4:Release  
+  new u5@d5:Release 
+  do !a4(u4); substrate(u4, KK_P, k4, KK)
+  or !a5(u5); substrate(u5, KK_P, k5, KK_PP)
+)
+and KK_PP() = (
+  new u6@d6:Release 
+  do !a6(u6); substrate(u6, KK_PP, k6, KK_P)
+  or ?a7(u7); enzyme(u7, k7, KK_PP)
+  or ?a9(u9); enzyme(u9, k9, KK_PP)
+)
+
+let KKPse() = 
+  do ?a4(u4); enzyme(u4, k4, KKPse)
+  or ?a6(u6); enzyme(u6, k6, KKPse)
+
+let K() = (
+  new u7@d7:Release 
+  !a7(u7); substrate(u7, K, k7, K_P)
+)
+and K_P() = (
+  new u8@d8:Release  
+  new u9@d9:Release 
+  do !a8(u8); substrate(u8, K_P, k8, K)
+  or !a9(u9); substrate(u9, K_P, k9, K_PP)
+)
+and K_PP() = (
+  new u10@d10:Release 
+  !a10(u10); substrate(u10, K_PP, k10, K_P)
+)
+
+let KPse() = 
+  do ?a8(u8); enzyme(u8, k8, KPse)
+  or ?a10(u10); enzyme(u10, k10, KPse)
+    
+run 100 of (KKK() | KK() | K())
+run ( E2() | KKPse() | KPse() | E1())
+

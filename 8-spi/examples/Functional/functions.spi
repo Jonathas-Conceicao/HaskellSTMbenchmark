@@ -1,0 +1,66 @@
+(* Various functions *)
+(*********************)
+let smaller(i:int,j:int,result:chan(int)) =
+  if i <= j then !result(i)
+  else !result(j)
+	  
+let factorial(n:int,result:chan(int)) =
+  if n = 0 then !result(1)
+  else 
+    ( new result':chan(int) 
+      factorial(n - 1,result'); 
+      ?result'(m); 
+      !result(m * n)
+    )
+
+let factorial'(n:int,acc:int,result:chan(int)) =
+  if n = 0 then !result(acc)
+  else factorial'(n - 1,acc*n,result)
+
+let fibonacci(n:int,result:chan(int)) = 
+  if n <= 1 then !result(1)
+  else 
+    ( new r:chan(int)
+      fibonacci(n-1,r); 
+      ?r(f); 
+      fibonacci(n-2,r); 
+      ?r(f'); 
+      !result(f+f')
+    )
+
+let fibonacci'(n:int,result:chan(int,int)) =
+  if n <= 1 then !result(1,1)
+  else 
+    ( new r:chan(int,int)
+      fibonacci'(n-1,r); 
+      ?r(f,f'); 
+      !result(f+f',f)
+    )
+
+let fibonacci''(n:int,f:int,f':int,result:chan(int)) =
+  if n <= 1 then !result(f')
+  else fibonacci''(n-1,f',f+f',result)
+
+new result:chan(int)
+new result':chan(int,int)
+run
+  smaller(4,3,result);
+  ?result(r); 
+  println("smaller 4 3 = " + show r);
+  factorial(6,result);
+  ?result(r); 
+  println("factorial 6 = " + show r);
+  factorial'(6,1,result);
+  ?result(r); 
+  println("factorial' 6 1 = " + show r);
+  fibonacci(8,result);
+  ?result(r); 
+  println("fibonacci 8 = " + show r);
+  fibonacci'(8,result');
+  ?result'(r); 
+  println("fibonacci' 8 = " + show r);
+  fibonacci''(8,1,1,result);
+  ?result(r); 
+  println("fibonacci'' 8 1 1 = " + show r);
+  break()
+

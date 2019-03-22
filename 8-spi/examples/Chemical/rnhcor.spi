@@ -1,0 +1,20 @@
+(* RNH2 + RCOOH <==> RNHCOR + H2O *)
+directive sample 0.05
+directive plot NH2(); NHCO()
+
+new amine@10.0:chan(chan)
+new hydrolysis@1.0:chan(chan)
+
+let R(e:chan) = !e
+
+let R_Amine() = ( new eRN:chan() ( NH2(eRN) | R(eRN) ) )
+and NH2(eRN:chan) = ?amine(eRC); NHCO(eRN,eRC)
+and NHCO(eRN:chan,eRC:chan) = !hydrolysis(eRC); NH2(eRN)
+
+let R_Carboxyl() = ( new eRC:chan() ( R(eRC) | COOH(eRC) ) )
+and COOH(eRC:chan) = !amine(eRC); H2O()
+and H2O() = ?hydrolysis(eRC); COOH(eRC)
+
+run 100 of ( R_Amine() | R_Carboxyl() )
+
+  

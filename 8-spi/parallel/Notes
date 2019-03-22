@@ -1,0 +1,136 @@
+QUERIES
+=======
+
+bug hunting
+  plotting seems backwards!
+
+Ideas for logging:
+  - print mean and std of each column at the end
+
+I wonder whether the most efficient way of minimizing data movement
+between processors might be to have all the exportCell operations
+evaluated one one processor.  This will mean that all the soups will
+have to move from their home processors to the mixing one, just once,
+and then back home again, just once.  Surely this is better than
+allowing them to move even twice, even if it means losing a little
+"potential parallelism."  No?
+
+General point to ponder: What does "compositionality" really mean, for
+STM?  In the present context, this comes out as "When are we in the
+STM monad, and when in the IO monad?"  (And what about things like the
+M monad?  Would it make sense for STM to be phrased as a monad
+transformer?)
+
+The step function is doing quite a bit of consing that should be
+fairly easy to eliminate (by not recalculating the list of weights on
+every step, for example).  But perhaps all this needs to be thought
+about differently with lazy evaluation...?
+
+Would it be clearer to rename initM to something like runM?  (Because
+it doesn't just initialize the monad, but also runs to completion
+within it.)  Or is this standard terminology?
+
+I don't fully understand what's going on with keeping counts of procs.
+(Why do we put zero counts in the process pool, just for the ones that
+we are going to log?)
+
+How can we measure what we're doing?
+
+________________
+
+
+Does forkIO do the right thing with the random number sequences in the
+different threads??  (I suppose it must.)
+
+________________
+        
+
+There's something a little bit fishy about the way we handle
+deadlines... We let all the cells run until they've completed their
+first actions AFTER the deadline and then exchange processes, but this
+means that they can, in principle, be exchanging processes "a little
+bit into the past [or future]" -- where "little" depends on what's
+going on in the different cells!  On the other hand, the global
+effects of this are probably negligible.
+
+________________
+
+
+{- In runCell, the computation from reading the soup tvar to writing
+   it back again is protected by an atomically block.  But this
+   conflicts with the fact that the runSoup in between is internally
+   doing stateful things in the IO monad -- in particular, it is
+   generating new unique names and using up random numbers.
+
+   Possible solutions:
+
+      - Don't protect the whole block with 'atomically', since we are
+        sure by construction that no one else will write this tvar
+        until the first barrier has been passed.  (This feels somehow
+        a bit unsafe, but in fact it is exactly the same reasoning as
+        we have used to convince ourselves that the transaction will
+        not get rolled back!  So maybe it's not so bad.)
+
+      - Eliminate the use of the IO monad by using splittable random
+        number generators and explicitly passing the random seed and
+        unique name out around the loop in runCell.
+
+      - Use unsafeIOToSTM (plus some fiddling to give it type M a ->
+        STM a instead of IO a -> STM a), since it's OK if the bumping
+        of unique names and using up of random numbers persists beyond
+        a transaction rollback.  (Actually, I'm not certain this
+        fiddling would work, since the STM monad isn't prepared to
+        deal with the M monad's internal state.)
+
+runCell :: Cell -> M ()
+runCell cell
+  = do	{ atomically (
+            do { soup <- readTVar (cl_soup cell)
+                 -- Run until the next deadline
+               ; soup' <- runSoup soup (cl_deadline cell)       
+               ; writeTVar (cl_soup cell) soup'
+               ; ()} )
+          -- Wait for everybody else to catch up, if necessary
+          -- (Note that we don't want to let anybody start exporting processes
+          -- to other cells until everybody has finished runSoup, because
+          -- this would almost certainly step on the above transaction.)
+	; awaitBarrier (cl_barrier cell)
+          -- Do end-of-epoch tasks 
+--	; exportProcesses cell
+--      ; doLogging cell
+          -- Wait for everybody to finish and then start over
+	; awaitBarrier (cl_barrier cell)
+	; runCell cell }
+
+LATER: Looks like the best solution is to remove IO from the M monad
+and have a way of grabbing the unique and random seeds out of the
+monad when it is finished.  Or, perhaps better, just eliminate the
+monad altogether.
+
+-}
+
+
+______________________________________________________________________________
+OUTLINE
+-------
+
+Each "cell" has a private soup of "processes".
+Each cell has "neighbouring cells".  Could be all other cells.
+
+It does this
+
+- Runs to next deadline
+	Initially, fixed interval, since diffusion is fixed rate
+
+- Selects some processes to export
+	number determined by time interval and population, 
+	but NOT	activity.  Since time interval is fixed,
+	this means select a fixed %age of population
+
+- Randomly select one or more neighbours, and export to them
+	Initially, choose just one
+	(Choose fewer => fewer collisions if we directly modify soup)
+
+- Send log information to the log server
+
+- Wait until everyone is done 

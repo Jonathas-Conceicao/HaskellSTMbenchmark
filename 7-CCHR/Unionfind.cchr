@@ -1,0 +1,63 @@
+name Unionfind
+
+constraint Unionfind = Make(String) | Root(String) | Union(String,String) | Link(String,String) | Points(String,String)
+
+rule Make(a) <==> Root(a)
+rule Union(a,b) <==> Link(a,b)
+rule Points(a,b),Link(a,c) <==> Points(a,b),Link(b,c)
+rule Points(a,b),Link(c,a) <==> Points(a,b),Link(c,b)
+rule Link(a,a) <==> True
+rule Link(a,b),Root(a),Root(b) <==> Points(b,a),Root(a)
+
+{
+--------------------------------------------------------------------------------
+--
+-- Copyright (C) 2006 
+--
+-- This program is free software; you can redistribute it and/or modify it
+-- under the terms of the GNU General Public License as published by the Free
+-- Software Foundation; either version 2 of the License, or (at your option)
+-- any later version. This program is distributed in the hope that it will be
+-- useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+-- See the GNU General Public License for more details.
+-- You should have received a copy of the GNU General Public License along
+-- with this program; if not, write to the Free Software Foundation, Inc.,
+-- 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+--
+--------------------------------------------------------------------------------
+
+import System
+import IO
+
+import CCHR.CCHRCommandLine
+
+instance Eq Unionfind where
+   Make(s) == Make(s') = s == s'
+   Root(s) == Root(s') = s == s'
+   Union(s1,s2) == Union(s1',s2') = (s1==s1') && (s2==s2')
+   Link(s1,s2) == Link(s1',s2') = (s1==s1') && (s2==s2')
+   Points(s1,s2) == Points(s1',s2') = (s1==s1') && (s2==s2')
+   _ == _ = False
+
+instance Show Unionfind where
+   show (Make(s)) = "Make(" ++ s ++ ")"
+   show (Root(s)) = "Root(" ++ s ++ ")"
+   show (Union(s1,s2)) = "Union(" ++ s1 ++ "," ++ s2 ++ ")"
+   show (Link(s1,s2)) = "Link(" ++ s1 ++ "," ++ s2 ++ ")"
+   show (Points(s1,s2)) = "Points(" ++ s1 ++ "," ++ s2 ++ ")"
+
+makeTree :: String -> Int -> [Unionfind]
+makeTree s i = Make(s):(makeTree' s i)
+               where
+                  makeTree' _ 0 = []
+                  makeTree' s i = [Points(s++"L",s),Points(s++"R",s)] ++  
+                                  (makeTree' (s++"L") (i-1)) ++ (makeTree' (s++"R") (i-1))
+
+testTree = (makeTree "a" 7) ++ (makeTree "b" 7) ++ [Union("aLLRLLRR","bLLLLRL")]
+
+main :: IO ()
+main = do
+    let uf = testTree
+    runCommand uf
+}

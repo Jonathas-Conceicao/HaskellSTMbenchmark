@@ -1,0 +1,57 @@
+name Prime
+
+constraint Prime = Prime(Int) | Candidate(Int)
+
+rule Candidate(1) <==> True
+
+rule Candidate(n) <==> Prime(n),Candidate(n-1)
+rule Prime(y),Prime(x) <==> x `mod` y == 0 | Prime(y)
+
+{
+--------------------------------------------------------------------------------
+--
+-- Copyright (C) 2006 
+--
+-- This program is free software; you can redistribute it and/or modify it
+-- under the terms of the GNU General Public License as published by the Free
+-- Software Foundation; either version 2 of the License, or (at your option)
+-- any later version. This program is distributed in the hope that it will be
+-- useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+-- See the GNU General Public License for more details.
+-- You should have received a copy of the GNU General Public License along
+-- with this program; if not, write to the Free Software Foundation, Inc.,
+-- 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+--
+--------------------------------------------------------------------------------
+
+import IO
+import System
+import System.Time
+
+import CCHR.CCHRCommandLine
+
+instance Eq Prime where
+   Prime(i) == Prime(j) = i == j
+   Candidate(i) == Candidate(j) = i == j
+   _ == _ = False
+
+
+instance Show Prime where
+   show (Prime(i))     = "Prime(" ++ (show i) ++ ")"
+   show (Candidate(i)) = "candidate(" ++ (show i) ++ ")"
+
+parallelPrime :: Int -> [Prime]
+parallelPrime n | n<2 = []
+parallelPrime n | (n `mod` 2 == 0) = Prime(n):(parallelPrime (n-1))
+parallelPrime n | (n `mod` 2 == 1) = (parallelPrime (n-1)) ++ [Prime(n)]
+
+singlePrime :: Int -> [Prime]
+singlePrime n = [Candidate(n)]
+
+main :: IO ()
+main = do
+   let pr = parallelPrime 4000
+   -- let pr = parallelPrime 2000
+   runCommand pr
+}

@@ -1,0 +1,39 @@
+(* User-defined boolean data type *)
+(**********************************)
+type boolean = True() | False()
+let or'(b:boolean,b':boolean,result:chan(boolean)) = 
+if (b,b') = (False(),False()) 
+then !result(False())
+else !result(True())
+
+let not'(b:boolean,result:chan(boolean)) = match b 
+  case False() -> !result(True())
+  case x -> !result(False())
+
+let and'(b:boolean,b':boolean,result:chan(boolean)) = match (b,b')
+  case (True(),True()) -> !result(True())
+  case x -> !result(False())
+
+new result:chan(boolean)
+run 
+  or'(False(),False(),result); 
+  ?result(r); 
+  println("or' False() False() = " + show r);
+  or'(True(),True(),result); 
+  ?result(r); 
+  println("or' True() True() = " + show r);
+  and'(False(),False(),result); 
+  ?result(r); 
+  println("and' False() False() = " + show r);
+  and'(True(),True(),result); 
+  ?result(r); 
+  println("and' True() True() = " + show r);
+  not'(True(),result); 
+  ?result(r); 
+  println("not' True() = " + show r);
+  not'(False(),result); 
+  ?result(r); 
+  println("not' False() = " + show r);
+  break()
+
+

@@ -1,0 +1,15 @@
+directive sample 35.0 10000
+directive plot ?c1; Y1(); Y2()
+
+new c1@0.0001:chan
+new c2@0.01:chan 
+val c3 = 10.0
+
+let X() = ?c1
+let Y1() = 
+  do !c1; Y1(); Y1()
+  or ?c2
+let Y2() = 
+  do !c2; Y2(); Y2()
+  or delay@c3
+run (100000 of ?c1 | 1000 of Y1() | 1000 of Y2())

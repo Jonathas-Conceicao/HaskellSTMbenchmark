@@ -1,0 +1,102 @@
+(* Lambda Switch *)
+directive sample 1000.0 1000
+directive plot Rep(); Cro()
+
+(* Signalling channels *)
+new or1_free:chan 
+new or1_rep:chan 
+new or2_free:chan 
+new or2_rep:chan 
+new or2_rnap:chan 
+
+(* Rep *)
+new rep_bind@0.498:chan(chan,chan)
+let Rep() = 
+  ?rep_bind(unbind,unbind'); Rep1(unbind,unbind')
+and Rep1(unbind:chan, unbind':chan) =
+    do ?unbind; Rep()
+    or ?unbind'; Rep()
+run 30 of Rep()
+
+(* Cro *)
+new cro_bind@0.498:chan(chan)
+let Cro() = 
+  ?cro_bind(unbind); Cro2(unbind)
+and Cro2(unbind:chan) = ?unbind; Cro()
+
+(* Rnap *)
+new rnap_bind@0.498:chan(chan,chan(proc()),chan(proc()))
+let Rnap() =
+  ?rnap_bind(unbind,transcribe,transcribe'); Rnap1(unbind,transcribe,transcribe')
+and Rnap1(unbind:chan,transcribe:chan(proc()),transcribe':chan(proc()))
+  = do ?unbind; Rnap()
+    or ?transcribe(protein); PR(protein)
+    or ?transcribe'(protein); PR(protein)
+and PR(protein:proc()) = (protein() | Rnap())
+(* run 1500 of Rnap() *)
+run 5000 of Rnap()
+
+(* Or1 *)
+new rep_unbind1@0.461:chan
+new cro_unbind1@0.340:chan
+new empty:chan
+let Or1_free() =
+  do !or1_free; Or1_free()
+  or !cro_bind(cro_unbind1); Or1_free1(cro_unbind1)
+  or ?or2_rnap; Or1_free2()
+  or !rep_bind(rep_unbind1,empty); Or1_rep()
+and Or1_free1(cro_unbind1:chan) = !cro_unbind1; Or1_free()
+and Or1_free2() = ?or2_free; Or1_free()
+and Or1_rep() =
+  do !or1_rep; Or1_rep()
+  or !rep_unbind1; Or1_free()
+run Or1_free()
+
+(* Or2/Pr *)
+new rnap_unbind2@25.0:chan
+new rnap_transcribe2@0.086:chan(proc())
+new rep_unbind2@12.0:chan
+new cro_unbind2@3.420:chan
+new rep_unbind2'@0.148:chan
+new empty:chan(proc())
+let Or2_free() = 
+  do !or2_free; Or2_free()
+  or !cro_bind(cro_unbind2); Or2_free1(cro_unbind2)
+  or !rep_bind(rep_unbind2,rep_unbind2'); Or2_rep()
+  or !rnap_bind(rnap_unbind2,rnap_transcribe2,empty); Or2_rnap()
+and Or2_free1(cro_unbind2:chan) = !cro_unbind2; Or2_free()
+and Or2_rep() =
+  do !or2_rep; Or2_rep()
+  or ?or1_rep; Or2_rep'()
+  or !rep_unbind2; Or2_free()
+and Or2_rep'() =
+  do !or2_rep; Or2_rep'()
+  or !rep_unbind2'; Or2_free()
+  or ?or1_free; Or2_rep()
+and Or2_rnap() =
+  do !or2_rnap; Or2_rnap()
+  or !rnap_unbind2; Or2_free()
+  or !rnap_transcribe2(Cro); Or2_free()
+run Or2_free()
+
+(* Or3/Prm *)
+new rep_unbind3@60.0:chan
+new cro_unbind3@0.030:chan
+new rnap_unbind3@25.0:chan
+new rnap_transcribe3@0.005:chan(proc())
+new rnap_transcribe3'@0.086:chan(proc())
+new empty:chan
+let Or3_free() =
+  do !rep_bind(rep_unbind3,empty); Or3_free1(rep_unbind3)
+  or !cro_bind(cro_unbind3); Or3_free1(cro_unbind3)
+  or !rnap_bind(rnap_unbind3,rnap_transcribe3,rnap_transcribe3'); Or3_rnap()
+and Or3_free1(unbind:chan) = !unbind; Or3_free()
+and Or3_rnap() = 
+  do ?or2_rep; Or3_rnap'()
+  or !rnap_unbind3; Or3_free()
+  or !rnap_transcribe3(Rep); Or3_free()
+and Or3_rnap'() =
+  do ?or2_free; Or3_rnap()
+  or !rnap_unbind3; Or3_free()
+  or !rnap_transcribe3'(Rep); Or3_free()
+run Or3_free()

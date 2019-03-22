@@ -1,0 +1,11 @@
+to compile, I use:
+cd spi
+cd parallel
+rm *.o
+
+rm *.o; ../../../../ghc-128/2/pes/pes2/compiler/ghc-inplace Main.hs --make -threaded -debug -fglasgow-exts -I/home/externs/pmucci/papi/src/ -L/home/externs/pmucci/papi/src/ -lpapi
+
+and then to run, ./Main has one argument to one of the *.spi files inside "examples"
+
+
+

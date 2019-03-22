@@ -1,0 +1,51 @@
+(* MAPK cascade *)
+directive sample 0.5
+directive plot KKK(); KKKst(); KK(); KK_PP(); KK_P(); K(); K_PP(); K_P()
+
+new a1@1.0:chan
+new a2@1.0:chan
+new a3@1.0:chan
+new a4@1.0:chan
+new a5@1.0:chan
+new a6@1.0:chan
+new a7@1.0:chan
+new a8@1.0:chan 
+new a9@1.0:chan
+new a10@1.0:chan
+
+let E(a:chan) = !a; E(a)
+let E1() = E(a1)
+let E2() = E(a2)
+
+let KKK() = ?a1; KKKst()
+and KKKst() = 
+  do ?a2; KKK()	
+  or !a3; KKKst()
+  or !a5; KKKst()
+
+let KK() = ?a3; KK_P()
+and KK_P() = 
+  do ?a4; KK()
+  or ?a5; KK_PP()
+and KK_PP() = 
+  do ?a6; KK_P()
+  or !a7; KK_PP()
+  or !a9; KK_PP()
+
+let Pase(a:chan,a':chan) = 
+  do !a; Pase(a,a')
+  or !a'; Pase(a,a')
+
+let KKPase() = Pase(a4,a6) 
+
+let K() = ?a7; K_P()
+and K_P() =
+  do ?a8; K()
+  or ?a9; K_PP()
+and K_PP() = ?a10; K_P()
+
+let KPase() = Pase(a8,a10)
+    
+run 100 of (KKK() | KK() | K())
+run ( E2() | KKPase() | KPase() | E1())
+

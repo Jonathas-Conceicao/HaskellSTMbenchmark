@@ -1,0 +1,58 @@
+name Gcd
+
+constraint Gcd = Gcd(Int)
+
+rule Gcd(0) <==> True
+rule Gcd(m),Gcd(n) <==> ((m>=n)&&(m/=0)&&(n/=0)) | Gcd(m-n),Gcd(n)
+
+{
+--------------------------------------------------------------------------------
+--
+-- Copyright (C) 2006 
+--
+-- This program is free software; you can redistribute it and/or modify it
+-- under the terms of the GNU General Public License as published by the Free
+-- Software Foundation; either version 2 of the License, or (at your option)
+-- any later version. This program is distributed in the hope that it will be
+-- useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+-- See the GNU General Public License for more details.
+-- You should have received a copy of the GNU General Public License along
+-- with this program; if not, write to the Free Software Foundation, Inc.,
+-- 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+--
+--------------------------------------------------------------------------------
+
+import Char
+import IO 
+import System
+import System.Time
+
+import CCHR.CCHRCommandLine
+
+instance Eq Gcd where
+
+   Gcd(i) == Gcd(j) = (i==j)
+
+
+instance Show Gcd where
+   show (Gcd(i)) = "Gcd(" ++ (show i) ++ ")"
+
+myState = [Gcd(45),Gcd(60),Gcd(150),Gcd(27),Gcd(81),Gcd(810),Gcd(1500)]
+
+moreGcd f i n | n<=i = []
+moreGcd f i n | i `mod` 2 == 0 = Gcd(f*i):(moreGcd f (i+1) n) 
+moreGcd f i n = (moreGcd f (i+1) n) ++ [Gcd(f*i)]
+
+moreGcd2 i n | n<=i = []
+moreGcd2 i n = (moreGcd2 (i+1) n) ++ [Gcd(7*i)]
+
+moreGcd3 i n | n<=i = []
+moreGcd3 i n = (Gcd(7*i)):(moreGcd3 (i+1) n)
+
+main :: IO ()
+main = do
+   -- let gcd = moreGcd 11 2 3000
+   let gcd = moreGcd 11 2 3000
+   runCommand gcd
+}

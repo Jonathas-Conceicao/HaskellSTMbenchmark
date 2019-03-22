@@ -1,0 +1,54 @@
+(* Gene Regulation by Positive Feedback *)
+directive sample 50.0 1000
+directive plot TF(); Free_A() 
+
+val transcribe = 4.0
+val transcribe' = 40.0
+val translate = 1.0
+val degrade' = 1.0
+val degrade = 0.1
+new bind@0.1 : chan(chan,chan(chan),chan)
+new tail@100.0: chan
+
+let A() = (
+  new u@10.0 : chan
+  new send@10.0 : chan(chan)
+  new remove: chan
+  Free_A(u,send,remove)
+)
+and Free_A(u:chan,send:chan(chan),remove:chan) = 
+    do delay@degrade
+    or !bind(u,send,remove); Bound_A(u,send,remove)
+and Bound_A(u:chan,send:chan(chan),remove:chan) =
+  do !u; Free_A(u,send,remove)
+  or delay@degrade; Bound_A_1(remove)
+  or !send(tail); Bound_A(u,send,remove)
+and Bound_A_1(remove:chan) = !remove
+
+let ATF(tail:chan) = 
+  do !tail; ATF(tail) 
+  or delay@degrade
+
+let TF() =
+  do delay@degrade
+  or ?bind(u,send,remove); TF_1(u,send,remove)
+
+and TF_1(u:chan,send:chan(chan),remove:chan)
+  = do ?remove
+    or ?u; TF()
+    or ?send(tail); TF_2(u, tail, remove)
+and TF_2(u:chan,tail:chan, remove:chan)
+  =   do ?remove
+      or ?u; ATF(tail)
+
+let RNA(P:proc()) =
+  do delay@translate; (P() | RNA(P))
+  or delay@degrade'
+
+let DNA(P:proc()) =
+  do delay@transcribe; (RNA(P) | DNA(P))
+  or ?tail; DNA_delay(P)
+and DNA_delay(P:proc()) 
+  = delay@transcribe'; (RNA(P) | DNA(P))
+
+run ( DNA(A) | DNA(TF) )

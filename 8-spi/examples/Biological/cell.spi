@@ -1,0 +1,49 @@
+(* Cell Cycle *)
+directive sample 120.0
+directive plot Cdh1(); Cyclin_Cdk(); Cdc14()
+
+new cyclin_degrade@0.005:chan new cdk_remove@0.001:chan new cki_degrade@0.003:chan
+new cdk_bind@0.500:chan(chan) new cdh1_inactivate@0.005:chan new cdh1_activate@0.009:chan
+new cdc14_activate@0.009:chan new nothing@0.017:chan new cki_bind@0.020:chan(chan) 
+new cki_unbind@0.010:chan
+
+let Cyclin() = (
+  new cdk_unbind@0.300:chan
+  !cdk_bind(cdk_unbind); Cyclin_Cdk(cdk_unbind)
+)
+and Cyclin_Cdk(cdk_unbind:chan)= 
+    do ?cyclin_degrade; Cyclin_Cdk_remove()
+    or !cki_degrade; Cyclin_Cdk(cdk_unbind)
+    or !cki_bind(cdk_unbind); Cyclin_Cdk2(cdk_unbind)
+
+and Cyclin_Cdk_remove() = !cdk_remove
+and Cyclin_Cdk2(cdk_unbind:chan) = !cdk_unbind; Cyclin_Cdk_Cki(cdk_unbind)
+
+and Cyclin_Cdk_Cki(cdk_unbind:chan)=  
+    do ?nothing; Cyclin_Cdk_Cki(cdk_unbind)
+    or ?cki_unbind; Cdk2(cdk_unbind)
+and Cdk2(cdk_unbind:chan) = (Cdk() | Cyclin_Cdk(cdk_unbind))
+and Cdk() = ?cdk_bind(unbind); Cdk_bound(unbind)
+and Cdk_bound(unbind:chan) = 
+  do ?cdk_remove; Cdk()
+  or !cdh1_inactivate; Cdk_bound(unbind)
+  or ?unbind
+
+let Cdh1() = 
+  do !cyclin_degrade; Cdh1() 
+  or !cdc14_activate; Cdh1()
+  or ?cdh1_inactivate; Cdh2()
+and Cdh2() = ?cdh1_activate; Cdh1()
+let Clock() = 
+  do !nothing; Clock()
+  or !cki_unbind; Clock()
+let Cki() = 
+  do ?cki_degrade
+  or ?cki_bind(unbind)
+
+let Cdc14() = !cdh1_activate; Cdc14_1()
+and Cdc14_1() = ?cdc14_activate; Cdc14()
+
+run 10 of ( Cdk() | Cdh1() | Cki() )
+run 20 of ( Cyclin() | Cdc14() )
+run Clock()

@@ -1,0 +1,23 @@
+(* K + Na + 2Cl <==> K+ + Na+ + 2Cl- *)
+directive sample 0.03
+directive plot Cl(); Na_plus(); K_plus()
+
+new ionize1@100.0:chan
+new deionize1@10.0:chan
+new ionize2@30.0:chan
+new deionize2@20.0:chan
+
+let Na() = !ionize1; Na_plus()
+and Na_plus() = ?deionize1; Na()
+    
+let K() = !ionize2; K_plus()
+and K_plus() = ?deionize2; K()
+    
+let Cl() = 
+  do ?ionize1; Cl_minus() 
+  or ?ionize2; Cl_minus()
+and Cl_minus() =
+  do !deionize1; Cl()
+  or !deionize2; Cl()
+
+run 100 of (Na() | Cl() | K())

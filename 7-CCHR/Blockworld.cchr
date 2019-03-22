@@ -1,0 +1,82 @@
+name Blockworld
+
+data Robot = Ro1 | Ro2
+
+constraint Blockworld = Get(Robot,String) | PutOn(Robot,String) | Holds(Robot,String) | EmptyB(Robot) | On(String,String) | Clear(String)
+
+rule Get(r,m),EmptyB(r),Clear(m),On(m,n) <==> Holds(r,m),Clear(n)
+rule PutOn(r,m),Holds(r,n),Clear(m) <==> EmptyB(r),Clear(n),On(n,m)
+
+{
+--------------------------------------------------------------------------------
+--
+-- Copyright (C) 2006 
+--
+-- This program is free software; you can redistribute it and/or modify it
+-- under the terms of the GNU General Public License as published by the Free
+-- Software Foundation; either version 2 of the License, or (at your option)
+-- any later version. This program is distributed in the hope that it will be
+-- useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+-- See the GNU General Public License for more details.
+-- You should have received a copy of the GNU General Public License along
+-- with this program; if not, write to the Free Software Foundation, Inc.,
+-- 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
+--
+--------------------------------------------------------------------------------
+
+import IO 
+import System
+import System.Time
+
+import CCHR.CCHRCommandLine
+
+data Robot = Ro1 | Ro2 deriving (Eq,Ord,Show)
+
+instance Eq Blockworld where
+   Get(r1,s1) == Get(r2,s2) = (r1==r2)&&(s1==s2)
+   PutOn(r1,s1) == PutOn(r2,s2) = (r1==r2)&&(s1==s2)
+   Holds(r1,s1) == Holds(r2,s2) = (r1==r2)&&(s1==s2)
+   EmptyB(r1) == EmptyB(r2) = r1==r2
+   On(r1,s1) == On(r2,s2) = (r1==r2)&&(s1==s2)
+   Clear(r1) == Clear(r2) = r1==r2
+   _ == _ = False
+
+instance Show Blockworld where
+   show (Get(r,s)) = "Get(" ++ (show r) ++ "," ++ s ++ ")"
+   show (PutOn(r,s)) = "PutOn(" ++ (show r) ++ "," ++ s ++ ")"  
+   show (Holds(r,s)) = "Holds(" ++ (show r) ++ "," ++ s ++ ")"
+   show (EmptyB(r)) = "EmptyB(" ++ (show r) ++ ")"
+   show (On(r,s)) = "On(" ++ r ++ "," ++ s ++ ")"
+   show (Clear(s)) = "Clear(" ++ s ++ ")"
+
+simpBW = [ Get(Ro1,"B5a"),PutOn(Ro1,"T1a"),Get(Ro1,"B4a"),PutOn(Ro1,"B5a"),Get(Ro1,"B3a"),PutOn(Ro1,"B4a"),Get(Ro1,"B2a"),
+           PutOn(Ro1,"B3a"),Get(Ro1,"B1a"),PutOn(Ro1,"B2a"),EmptyB(Ro1),
+           Clear("B5a"),On("B5a","B4a"),On("B4a","B3a"),On("B3a","B2a"),On("B2a","B1a"),On("B1a","T2a"),Clear("T1a"),
+           Clear("B5b"),On("B5b","B4b"),On("B4b","B3b"),On("B3b","B2b"),On("B2b","B1b"),On("B1a","T4b"),Clear("T3b")          
+         ]
+
+bwInst :: Robot -> String -> Int -> [Blockworld]
+bwInst r s i = [Clear("B"++(show i)++s)] ++ (blocks s i) ++ (acts r s i) ++ [Clear("T100"++s)]
+               where
+                acts r s i  = [Get(r,"B"++(show i)++s),PutOn(r,"T1"++s)] ++ (acts' r s (i-1))
+                acts' r s 1 = [Get(r,"B1"++s),PutOn(r,"B2"++s),EmptyB(r)]
+                acts' r s i = (acts' r s (i-1)) ++ [Get(r,"B"++(show i)++s),PutOn(r,"B"++(show (i+1))++s)]
+                blocks s 1  = [On("B1"++s,"T2"++s),Clear("T1"++s)]
+                blocks s i  = (On("B"++(show i)++s,"B"++(show (i-1))++s)):(blocks s (i-1))
+
+bwInst2 :: (Robot,Robot) -> String -> Int -> [Blockworld]
+bwInst2 (r1,r2) s i = [Clear("B"++(show i)++s)] ++ (blocks s i) ++ (acts (r1,r2) s i) ++ [Clear("T100"++s)]
+                      where
+                        acts (r1,r2) s i  = [Get(r1,"B"++(show i)++s),PutOn(r1,"T1"++s)] ++ (acts' (r2,r1) s (i-1))
+                        acts' (r1,r2) s 1 = [Get(r1,"B1"++s),PutOn(r1,"B2"++s),EmptyB(r1),EmptyB(r2)]
+                        acts' (r1,r2) s i = (acts' (r2,r1) s (i-1)) ++ [Get(r1,"B"++(show i)++s),PutOn(r1,"B"++(show (i+1))++s)]
+                        blocks s 1  = [On("B1"++s,"T2"++s),Clear("T1"++s)]
+                        blocks s i  = (On("B"++(show i)++s,"B"++(show (i-1))++s)):(blocks s (i-1))
+
+main :: IO ()
+main = do
+    let bw = (bwInst Ro1 "a" 100) ++ [Clear("T5")] ++ (bwInst Ro2 "b" 100)
+    -- let bw = bwInst2 (Ro1,Ro2) "a" 100
+    runCommand bw
+}

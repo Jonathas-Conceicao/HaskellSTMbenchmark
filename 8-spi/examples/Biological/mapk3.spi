@@ -1,0 +1,83 @@
+(* Huang & Ferrell MAPK cascade *)
+directive sample 20.0
+directive plot KKK(); KKKst(); KK(); KK_PP(); KK_P(); K(); K_PP(); K_P()
+
+type bond = chan(chan,chan) 
+
+new a1@1.0:bond val d1=1.0 new k1@1.0:chan
+new a2@1.0:bond val d2=1.0 new k2@1.0:chan
+new a3@1.0:bond val d3=1.0 new k3@1.0:chan
+new a4@1.0:bond val d4=1.0 new k4@1.0:chan
+new a5@1.0:bond val d5=1.0 new k5@1.0:chan
+new a6@1.0:bond val d6=1.0 new k6@1.0:chan
+new a7@1.0:bond val d7=1.0 new k7@1.0:chan
+new a8@1.0:bond val d8=1.0 new k8@1.0:chan
+new a9@1.0:bond val d9=1.0 new k9@1.0:chan
+new a10@1.0:bond val d10=1.0 new k10@1.0:chan
+
+let enzyme (unbind:chan, react:chan, E:proc()) =
+  do ?unbind; E() 
+  or ?react; E()
+
+let substrate (unbind:chan, Sub:proc(), react:chan, Product:proc()) =
+  do !unbind; Sub() 
+  or !react; Product()
+
+let E3(a:bond,u:chan,k:chan,d:float) = do ?u; E(a,k,d) or ?k; E(a,k,d)
+and E1() = E(a1,k1,d1)
+and E2() = E(a2,k2,d2)
+and E(a:bond,k:chan,d:float) = (
+  new u@d:chan 
+  !a(u,k); E3(a,u,k,d)
+)
+let KKK() = ?a1(u,k); KKK_E(u,k)
+and KKK_E(u:chan,k:chan) = substrate(u,KKK,k,KKKst)
+and KKKst() = (
+  new u3@d3:chan 
+  new u5@d5:chan 
+  do ?a2(k,u); KKK_E(u,k)	
+  or !a3(u3,k3); enzyme(u3,k3,KKKst)
+  or !a5(u5,k5); enzyme(u5,k5,KKKst)
+)
+
+let KK() = ?a3(u,k); KK_E(u,k)
+and KK_E(u:chan,k:chan) = do !u; KK() or !k; KK_P()
+and KK_P() = 
+  do ?a4(k,u); KK_E(u,k)
+  or ?a5(u,k); KK_P_E(u,k)
+and KK_P_E(u:chan,k:chan) = do !u; KK_P() or !k; KK_PP()
+and KK_PP() = (
+  new u7@d7:chan 
+  new u9@d9:chan 
+  do ?a6(k,u); KK_P_E(u,k)
+  or !a7(u7,k7); enzyme(u7,k7,KK_PP)
+  or !a9(u9,k9); enzyme(u9,k9,KK_PP)
+)
+
+let K() = ?a7(u,k); K_E(u,k) 
+and K_E(u:chan,k:chan) = substrate(u,K,k,K_P)
+and K_P() = 
+  do ?a8(k,u); K_E(u,k)
+  or ?a9(u,k); K_P_E(u,k)
+and K_P_E(u:chan,k:chan) = substrate(u,K_P,k,K_PP)
+and K_PP() = ?a10(k,u); K_P_E(u,k)
+
+let Pase(a:bond,k:chan,d:float,a':bond,k':chan,d':float) = (
+  new u@d:chan
+  new u'@d':chan
+  do !a(u,k);    Pase1(u,a,k,d,a',k',d')
+  or !a'(u',k'); Pase2(u',a,k,d,a',k',d')
+)
+
+let Pase1(u,a,k,d,a',k',d')
+  = do ?u; Pase(a,k,d,a',k',d') or ?k; Pase(a,k,d,a',k',d')
+
+let Pase2(u',a,k,d,a',k',d') 
+  = do ?u'; Pase(a,k,d,a',k',d') or ?k'; Pase(a,k,d,a',k',d')
+
+let KKPase() = Pase(a4,k4,d4,a6,k6,d6)
+let KPase() = Pase(a8,k8,d8,a10,k10,d10)
+    
+run 100 of (KKK() | KK() | K())
+run ( E2() | KKPase() | KPase() | E1())
+

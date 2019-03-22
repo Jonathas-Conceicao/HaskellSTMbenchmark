@@ -1,0 +1,9 @@
+cell			works (after lifting nested bindings)
+clock.spi		Seems to take a lot more steps than spim
+feedback.spi		Infinite rate channel
+lambda.spi		Infinite rate channel
+mapk.spi		works
+mapk2.spi		works
+mapk3.spi		works
+repressilator.spi	works
+repressilator2.spi	works

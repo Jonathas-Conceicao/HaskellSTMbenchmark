@@ -1,0 +1,49 @@
+(* User-defined tree data type *)
+(*******************************)
+type tree = Node('a,tree,tree) | Leaf()
+type int_tree = Node(int,int_tree,int_tree) | Leaf()
+let map(f:proc('a,chan('b)),t:tree,result:chan(tree)) = match t
+  case Leaf() -> !result(Leaf())
+  case Node(x,t,t') -> (
+    new r:chan(tree) 
+    map(f,t,r); 
+    ?r(t); 
+    map(f,t',r); 
+    ?r(t');(
+      new r:chan('b)
+      f(x,r); 
+      ?r(y); 
+      !result(Node(y,t,t'))
+    )
+  )
+							
+let member(x:'a,t:tree,result:chan(bool)) = match t 
+  case Leaf() -> !result(false)
+  case Node(y,t,t') ->
+    if x = y then !result(true)
+    else (
+      new r:chan(bool) 
+      member(x,t,r);
+      ?r(b);
+      if b then !result(true)
+      else member(x,t',result)
+    )
+
+let double(i:int,result:chan(int)) = !result(i*2)
+val t:int_tree = Node(1,Node(2,Node(3,Leaf(),Leaf()),Leaf()),Node(4,Leaf(),Leaf()))
+new result:chan(int_tree)
+run
+  println("t = " + show t); 
+  map(double,t,result); 
+  ?result(t');
+  println("map double t = " + show t');(
+    new result:chan(bool)
+    member(3,t,result); 
+    ?result(b); 
+    println("member 3 t = " + show b);
+    member(5,t,result); 
+    ?result(b); 
+    println("member 5 t = " + show b);
+    break()
+  )
+

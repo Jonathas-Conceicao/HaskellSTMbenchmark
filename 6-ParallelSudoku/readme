@@ -1,0 +1,10 @@
+to compile, I use:
+
+rm *.o; ../../../../ghc-128/2/pes/pes2/compiler/ghc-inplace SudokuWss2Prof.hs --make -threaded -debug -fglasgow-exts -I/home/externs/pmucci/papi/src/ -L/home/externs/pmucci/papi/src/ -lpapi
+
+
+and to run:
+
+./SudokuWss2Prof +RTS -Nx -H200M
+
+I've usually used the "diabolical" initial Sudoku layout.

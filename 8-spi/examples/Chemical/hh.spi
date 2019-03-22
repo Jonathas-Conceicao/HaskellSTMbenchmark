@@ -1,0 +1,15 @@
+(* H + H <==> H2 *)
+directive sample 0.2
+directive plot H(); H_Bound()
+
+new share@5.0:chan(chan)
+let H() = (
+  new e@0.05:chan
+  do !share(e); H_Bound(e)
+  or ?share(e); H_Bound(e)
+)
+and H_Bound(e:chan) = 
+  do !e; H()
+  or ?e; H()
+
+run 100 of H()

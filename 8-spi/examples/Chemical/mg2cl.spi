@@ -1,0 +1,20 @@
+(* Mg + 2Cl <==> Mg+2 + 2Cl- *)
+directive sample 0.03
+directive plot Mg(); Mg_plus(); Mg_plus2()
+
+new ionize1@10.0:chan new ionize2@100.0:chan
+new deionize1@50.0:chan new deionize2@5.0:chan
+
+let Mg() = !ionize1; Mg_plus()
+and Mg_plus() = 
+  do !ionize2; Mg_plus2()
+  or ?deionize1; Mg()
+and Mg_plus2() = ?deionize2; Mg_plus()
+
+let Cl() = 
+  do ?ionize1; Cl_minus()
+  or ?ionize2; Cl_minus()
+and Cl_minus() =
+  do !deionize1; Cl()
+  or !deionize2; Cl()
+run 100 of ( Mg() | Cl() )

@@ -1,0 +1,77 @@
+(* Circadian Clock *)
+directive sample 800.0 1000
+directive plot ?degrademA as "RNA A"; ?degrademR as "RNA R";
+               ?degradeA as "A"; ?degradeR as "R"
+
+(* Binding Sites *)
+new rbs@100.0:chan(chan)
+new pA@10.0:chan(chan) 
+new pR@10.0:chan(chan) 
+
+(* A *)
+val transcribeA = 4.0
+val transcribe'A = 40.0
+val translateA = 1.0
+new degrademA@1.0:chan 
+new degradeA@0.1:chan 
+
+let Release(release:chan) = !release
+
+let A() = (
+  new release:chan 
+  new unbindpA@10.0:chan 
+  new unbindpR@100.0:chan
+  do !pA(unbindpA); A3(unbindpA)
+  or !pR(unbindpR); A3(unbindpR)
+  or ?degradeA
+  or !rbs(release); A2(release)
+)
+and A2(release:chan) 
+  = do ?degradeA; Release(release)
+    or ?release; A()
+and A3(unbind:chan) = ?unbind; A()
+
+(* R *)
+val transcribeR = 0.001
+val transcribe'R = 2.0
+val translateR = 0.1
+new degrademR@0.02:chan
+new degradeR@0.01:chan
+let R() =
+  do ?degradeR
+  or ?rbs(release); R2(release)
+
+and R2(release:chan) 
+  = do ?release; R()
+    or ?degradeR; Release(release)
+
+(* RNA *)
+let RNA(degrade:chan,translate:float,P:proc()) = 
+  do delay@translate; RNA_P(degrade, translate, P)
+  or ?degrade
+and RNA_P(degrade:chan,translate:float,P:proc()) = (P()| RNA(degrade,translate,P))
+
+let RNA_A() = RNA(degrademA,translateA,A)
+let RNA_R() = RNA(degrademR,translateR,R)
+
+(* DNA *)
+let DNA(a:chan(chan),t:float,t':float,RNA:proc()) = 
+  do delay@t; (RNA() | DNA(a,t,t',RNA))
+  or ?a(unbind); Active(unbind,a,t,t',RNA)
+and Active(unbind:chan,a:chan(chan),t:float,t':float,RNA:proc()) =  
+  do delay@t'; (RNA()| Active(unbind,a,t,t',RNA))
+  or !unbind; DNA(a,t,t',RNA)
+
+let DNA_A() = DNA(pA,transcribeA,transcribe'A,RNA_A)
+let DNA_R() = DNA(pR,transcribeR,transcribe'R,RNA_R)
+
+(* Proteins *)
+let Proteins() = 
+  do !degradeA; Proteins()
+  or !degradeR; Proteins()
+  or !degrademA; Proteins()
+  or !degrademR; Proteins()
+
+run (Proteins() | DNA_A() | DNA_R())
+
+

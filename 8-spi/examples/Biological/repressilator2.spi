@@ -1,0 +1,39 @@
+(* Repressilator with Hill=2 *)
+directive sample 100000.0 1000
+directive plot !a1; !b1; !c1
+
+val bind_rate1 = 0.01
+val unbind_rate1 = 0.01
+val bind_rate2 = 1.0
+val unbind_rate2 = 0.0001
+val degrade = 0.001
+val transcribe = 0.1 
+type site = chan(chan)
+
+new a1@bind_rate1 : site  new a2@bind_rate2 : site 
+new b1@bind_rate1 : site  new b2@bind_rate2 : site
+new c1@bind_rate1 : site  new c2@bind_rate2 : site
+
+let Protein(p1:site,p2:site) = (
+  new unbind1@unbind_rate1: chan
+  new unbind2@unbind_rate2: chan
+    do !p1(unbind1); PU(unbind1,p1,p2)
+    or !p2(unbind2); PU(unbind2,p1,p2)
+    or delay@degrade
+)
+and PU(unbind:chan,p1:site,p2:site) = ?unbind; Protein(p1,p2)
+
+let Gate(a1:site,a2:site,b1:site,b2:site) =
+  do delay@transcribe; PG(a1,a2,b1,b2)
+  or ?a1(unbind); Gate2(unbind,a1,a2,b1,b2)
+
+and Gate2(unbind:chan,a1:site,a2:site,b1:site,b2:site) 
+  = do !unbind; Gate(a1,a2,b1,b2)
+    or ?a2(unbind); GateU(unbind,a1,a2,b1,b2)
+
+and GateU(unbind:chan,a1:site,a2:site,b1:site,b2:site) 
+  = !unbind; Gate(a1,a2,b1,b2) 
+
+and PG(a1:site,a2:site,b1:site,b2:site) = (Protein(b1,b2) | Gate(a1,a2,b1,b2))
+
+run ( Gate(a1,a2,b1,b2) | Gate(b1,b2,c1,c2) | Gate(c1,c2,a1,a2) )
