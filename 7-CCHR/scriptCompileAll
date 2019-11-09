@@ -1,12 +1,10 @@
 #!/bin/bash
-rm *.o
-rm CCHR/*.o
-rm CCHRCompiler/*.o
-rm CCHR/Control/*.o
+rm *.o *.hi
+rm CCHR/*.o *.hi
+rm CCHRCompiler/*.o *.hi
+rm CCHR/Control/*.o *.hi
 
 for program in "Sudoku" "Gcd" "Unionfind" "Blockworld" "Prime"
 	do
-
-ghc-6.6.1 --make $program.hs -fglasgow-exts -threaded
-
-done
+		ghc --make $program.hs -fglasgow-exts -threaded -fno-warn-tabs
+	done

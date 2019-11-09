@@ -7,11 +7,11 @@ module Main where
 import Data.List
 import Control.Concurrent.STM
 import Control.Concurrent
-import Control.Monad
+import Control.Monad hiding (void)
 import GHC.Conc
 import System.Time
 import Text.Printf
-import System
+--import System
 
 type Grid             = Matrix Value
 type Matrix a         = [Row a]

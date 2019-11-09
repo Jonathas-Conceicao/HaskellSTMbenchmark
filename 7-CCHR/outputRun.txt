@@ -1,0 +1,6 @@
+Begin Solver Run: 
+
+Running Solver with SMALL step search, DISTINCT entry points and 1 threads :
+Time Taken: TimeDiff {tdYear = 0, tdMonth = 0, tdDay = 0, tdHour = 0, tdMin = 0, tdSec = 39, tdPicosec = -165240000000}
+[Gcd(11)]
+

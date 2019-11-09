@@ -52,6 +52,7 @@ import CCHR.Control.Fix
 import CCHR.Control.Trans
 import CCHR.Control.Reader
 import CCHR.Control.Writer
+import Control.Applicative
 
 -- ---------------------------------------------------------------------------
 -- | /get/ returns the state from the internals of the monad.
@@ -101,10 +102,14 @@ instance Functor (State s) where
 		in (f a, s')
 
 instance Monad (State s) where
-	return a = State $ \s -> (a, s)
+	--return a = State $ \s -> (a, s)
 	m >>= k  = State $ \s -> let
 		(a, s') = runState m s
 		in runState (k a) s'
+
+instance Applicative (State s) where
+	pure a = State $ \s -> (a, s)
+	(<*>) = ap
 
 instance MonadFix (State s) where
 	mfix f = State $ \s -> let (a, s') = runState (f a) s in (a, s')
@@ -193,9 +198,17 @@ instance (Monad m) => Monad (StateT s m) where
 		runStateT (k a) s'
 	fail str = StateT $ \_ -> fail str
 
+instance (Monad m) => Applicative (StateT s m) where
+	--pure a = StateT $ \s -> return (a, s)
+    (<*>) = ap
+
 instance (MonadPlus m) => MonadPlus (StateT s m) where
 	mzero       = StateT $ \_ -> mzero
 	m `mplus` n = StateT $ \s -> runStateT m s `mplus` runStateT n s
+
+instance (MonadPlus m) => Alternative (StateT s m) where
+	(<|>) = mplus
+	empty = mzero 
 
 instance (MonadFix m) => MonadFix (StateT s m) where
 	mfix f = StateT $ \s -> mfix $ \ ~(a, _) -> runStateT (f a) s

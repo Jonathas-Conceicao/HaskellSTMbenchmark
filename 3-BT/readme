@@ -1,4 +1,0 @@
-to run:
-./Main "#ops" "#initialtreesize" "#threads" "#runs" +RTS -Nx -H200M etc...
-
-

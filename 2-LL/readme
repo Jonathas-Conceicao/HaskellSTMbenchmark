@@ -1,3 +1,0 @@
-to run: ./Main "#ops" "#listsize" "#threads" "#runs" +RTS -Nx -H200M etc...
-
-

@@ -19,7 +19,7 @@ import CCHR.Control.State
 --
 --------------------------------------------------------------------------------
 
-import List
+import Data.List
 
 import CCHR.CCHRCommandLine
 

@@ -3,17 +3,17 @@ module Main where
 import Control.Concurrent
 import GHC.Conc
 import Control.Monad
-import Random
+import System.Random
 import System.Time
 import Text.Printf
-import System
+import System.Environment
 
 import RunSoup( runSoup )
 import Soup( emptySoup, showDebugHeaders )
 import Compile( compileProgram )
 import Parser( parseProgram )
 import Cell
-import IO
+import System.IO
 import System.Environment( getArgs )
 
 -- Number of cells (~ number of processors), etc.

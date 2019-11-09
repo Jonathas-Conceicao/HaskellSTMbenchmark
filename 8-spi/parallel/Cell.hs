@@ -5,8 +5,8 @@ import Event
 import Soup    
 import RunSoup
 
-import IO
-import System.IO	( fixIO )
+--import IO
+import System.IO	--( fixIO )
 import Control.Concurrent.STM
 import Control.Concurrent ( forkIO )
 import Control.Monad	( foldM )

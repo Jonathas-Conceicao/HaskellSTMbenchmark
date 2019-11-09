@@ -1,13 +1,18 @@
 #!/bin/bash
 
-ghcpath="/usr/local/bin"
-benchpath="/home/rio/HaskellSTMbenchmark"
+#ghcpath="/media/rmduarte/rmduarte/Repositorios/ghc_modify_86/inplace/bin/ghc-stage2"
+#ghcpath="/home/rmduarte/Repositorios/ghc-tstate/inplace/bin/ghc-stage2"
+ghcpath="ghc"
+cd ..
+benchpath=`pwd`
 
-ghcoptions="--make -O -threaded -fglasgow-exts"
+#ghcoptions="-debug --make -O -threaded -fglasgow-exts -rtsopts -eventlog -fno-warn-tabs"
+ghcoptions="--make -O -threaded -fglasgow-exts -rtsopts -eventlog -fno-warn-tabs"
+ghcoptions2="--make -threaded -fglasgow-exts -rtsopts -fno-warn-tabs"
 
 #clean .o's,  prepare directories
 
-cd $benchpath/1-SharedInt/
+cd $benchpath/1-SI/
               rm *.o
 
 cd $benchpath/2-LL/
@@ -16,13 +21,13 @@ cd $benchpath/2-LL/
 cd $benchpath/3-BT/
 	      find . -name '*.o' -exec rm {} \;
 
-cd $benchpath/4-HashTable/
+cd $benchpath/4-HT/
 	      find . -name '*.o' -exec rm {} \;
 
-cd $benchpath/5-TCache/
-	      rm Main
-	      find . -name '*.o' -exec rm {} \;
-	      find . -name '*.hi' -exec rm {} \;
+# cd $benchpath/5-TCache/
+# 	      rm Main
+# 	      find . -name '*.o' -exec rm {} \;
+# 	      find . -name '*.hi' -exec rm {} \;
 
 cd $benchpath/6-ParallelSudoku/
               rm *.o
@@ -36,36 +41,36 @@ cd $benchpath/8-spi/
 # COMPILE
 
 echo SI
-cd $benchpath/1-SharedInt
-$ghcpath/ghc Main.hs $ghcoptions 
+cd $benchpath/1-SI
+$ghcpath Main.hs $ghcoptions 
 
 echo LL
-cd $benchpath/2-LL/withoutUnread
-$ghcpath/ghc Main.hs $ghcoptions
+cd $benchpath/2-LL
+$ghcpath Main.hs $ghcoptions
 
 echo BT
-cd $benchpath/3-BT/withoutUnread
-$ghcpath/ghc Main.hs $ghcoptions
+cd $benchpath/3-BT
+$ghcpath Main.hs $ghcoptions
 
 echo HT
-cd $benchpath/4-HashTable
-$ghcpath/ghc Main.hs $ghcoptions
+cd $benchpath/4-HT
+$ghcpath Main.hs $ghcoptions
 
-echo TCache
-cd $benchpath/5-TCache
-$ghcpath/ghc Main.hs --make -threaded -fglasgow-exts #does not work with -O. nor with ghc-6.10
+# echo TCache
+# cd $benchpath/5-TCache
+# $ghcpath/ghc-stage2 Main.hs --make -threaded -fglasgow-exts #does not work with -O. nor with ghc-6.10
 
 echo Sud
 cd $benchpath/6-ParallelSudoku
-$ghcpath/ghc Main.hs $ghcoptions
+$ghcpath Main.hs $ghcoptions
 
 echo CCHR
 cd $benchpath/7-CCHR
 for program in "Sudoku" "Gcd" "Unionfind" "Blockworld" "Prime"
   do
-    $ghcpath/ghc $program.hs --make -threaded -fglasgow-exts # -O does not work here either
+    $ghcpath $program.hs $ghcoptions2 # -O does not work here either
   done
 
 echo SPI
 cd $benchpath/8-spi/parallel/
-$ghcpath/ghc Main.hs $ghcoptions
+$ghcpath Main.hs $ghcoptions

@@ -17,7 +17,7 @@
 
 module CCHR.TList where
 
-import List
+import Data.List
 import GHC.Conc
 --import Control.Monad.State
 

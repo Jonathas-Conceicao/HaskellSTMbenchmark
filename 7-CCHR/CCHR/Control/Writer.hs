@@ -41,6 +41,7 @@ import CCHR.Control.Fix
 import CCHR.Control.Trans
 import CCHR.Control.Reader
 import Data.Monoid
+import Control.Applicative
 
 -- ---------------------------------------------------------------------------
 -- MonadWriter class
@@ -78,11 +79,15 @@ instance Functor (Writer w) where
 	fmap f m = Writer $ let (a, w) = runWriter m in (f a, w)
 
 instance (Monoid w) => Monad (Writer w) where
-	return a = Writer (a, mempty)
+	--return a = Writer (a, mempty)
 	m >>= k  = Writer $ let
 		(a, w)  = runWriter m
 		(b, w') = runWriter (k a)
 		in (b, w `mappend` w')
+
+instance (Monoid w) => Applicative (Writer w) where
+	pure a = Writer (a, mempty)
+	(<*>) = ap
 
 instance (Monoid w) => MonadFix (Writer w) where
 	mfix m = Writer $ let (a, w) = runWriter (m a) in (a, w)
@@ -109,12 +114,20 @@ instance (Monad m) => Functor (WriterT w m) where
 		return (f a, w)
 
 instance (Monoid w, Monad m) => Monad (WriterT w m) where
-	return a = WriterT $ return (a, mempty)
+	--return a = WriterT $ return (a, mempty)
 	m >>= k  = WriterT $ do
 		(a, w)  <- runWriterT m
 		(b, w') <- runWriterT (k a)
 		return (b, w `mappend` w')
 	fail msg = WriterT $ fail msg
+
+instance (Monoid w, Monad m) => Applicative (WriterT w m) where
+	pure a = WriterT $ return (a, mempty)
+	(<*>) = ap
+
+instance (Monoid w, Monad m) => Alternative (WriterT w m) where
+	-- (<|>) = mplus
+	--empty <*> a = empty
 
 instance (Monoid w, MonadPlus m) => MonadPlus (WriterT w m) where
 	mzero       = WriterT mzero

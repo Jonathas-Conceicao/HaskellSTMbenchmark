@@ -19,8 +19,8 @@ import CCHR.Control.State
 --
 --------------------------------------------------------------------------------
 
-import IO
-import System
+import System.IO
+import System.Environment
 import System.Time
 
 import CCHR.CCHRCommandLine

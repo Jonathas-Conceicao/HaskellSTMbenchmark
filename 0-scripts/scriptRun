@@ -1,10 +1,10 @@
 #!/bin/bash
 # Execution script
-
-benchpath="/home/rio/HaskellSTMbenchmark"
+cd ..
+benchpath=`pwd`
 rtsopts="-H200M -K200M"
 # the results path is /x-Results in benchmark dir
-cores="1 2" # 4 8  
+cores="1 2 4" # 4 8  
 runs=1  # 5
 
 #clean results,  prepare directory
@@ -21,7 +21,7 @@ for numOp in 200000
               for((i=1;$i<=$runs;i=$(($i+1))));
                    do
                        ops=$(($numOp/$numThreads))
-                       $echo /usr/bin/time $benchpath/1-SharedInt/Main $ops $numThreads 1 +RTS -N$numThreads $rtsopts -RTS  >> "$benchpath/x-Results/SI-$numThreads" 2>&1
+                       $echo $benchpath/1-SI/Main $ops $numThreads 1 +RTS -N$numThreads $rtsopts -RTS  >> "$benchpath/x-Results/SI-$numThreads" 2>&1
                 done
          done
    done
@@ -37,7 +37,7 @@ echo LL
               for((i=1;$i<=$runs;i=$(($i+1))));
                       do
                         ops=$(($numOp/$numThreads))
-                        $echo /usr/bin/time $benchpath/2-LL/withoutUnread/Main $ops $lengthList $numThreads 1 +RTS -N$numThreads $rtsopts -RTS  >> "$benchpath/x-Results/LL-$numThreads" 2>&1
+                        $echo $benchpath/2-LL/Main $ops $lengthList $numThreads 1 +RTS -N$numThreads $rtsopts -RTS  >> "$benchpath/x-Results/LL-$numThreads" 2>&1
                 done
          done
    done
@@ -54,7 +54,7 @@ echo BT
               for((i=1;$i<=$runs;i=$(($i+1))));
                       do
                   ops=$(($numOp/$numThreads))
-                  $echo /usr/bin/time $benchpath/3-BT/withoutUnread/Main $ops $lengthList $numThreads 1 +RTS -N$numThreads $rtsopts -RTS  >> "$benchpath/x-Results/BT-$numThreads" 2>&1
+                  $echo $benchpath/3-BT/Main $ops $lengthList $numThreads 1 +RTS -N$numThreads $rtsopts -RTS  >> "$benchpath/x-Results/BT-$numThreads" 2>&1
                 done
          done
    done
@@ -71,25 +71,25 @@ echo HT
               for((i=1;$i<=$runs;i=$(($i+1))));
                   do
                       ops=$(($numOp/$numThreads))
-                      $echo /usr/bin/time $benchpath/4-HashTable/Main $ops $lengthList $numThreads 1 +RTS -N$numThreads $rtsopts -RTS  >> "$benchpath/x-Results/HT-$numThreads" 2>&1
+                      $echo $benchpath/4-HT/Main $ops $lengthList $numThreads 1 +RTS -N$numThreads $rtsopts -RTS  >> "$benchpath/x-Results/HT-$numThreads" 2>&1
                 done
          done
    done
 done
 
-#TCache
-echo TCache
-for numOp in 200000
-        do
-          for numThreads in $cores
-               do
-                        for((i=1;$i<=$runs;i=$(($i+1))));
-                           do
-                           ops=$(($numOp/$numThreads))
-                           $echo /usr/bin/time $benchpath/5-TCache/Main $ops $numThreads +RTS -N$numThreads $rtsopts -RTS  >> "$benchpath/x-Results/TC-$numThreads" 2>&1
-                           done
-               done
-        done
+# #TCache
+# echo TCache
+# for numOp in 200000
+#         do
+#           for numThreads in $cores
+#                do
+#                         for((i=1;$i<=$runs;i=$(($i+1))));
+#                            do
+#                            ops=$(($numOp/$numThreads))
+#                            $echo /usr/bin/time $benchpath/5-TCache/Main $ops $numThreads +RTS -N$numThreads $rtsopts -RTS  >> "$benchpath/x-Results/TC-$numThreads" 2>&1
+#                            done
+#                done
+#         done
 
 #Sudoku
 echo Sud
@@ -97,7 +97,7 @@ echo Sud
                do
               for((i=1;$i<=$runs;i=$(($i+1))));
                       do
-                        $echo /usr/bin/time $benchpath/6-ParallelSudoku/Main +RTS -N$numThreads $rtsopts -RTS  >> "$benchpath/x-Results/Sud-$numThreads" 2>&1
+                        $echo $benchpath/6-ParallelSudoku/Main +RTS -N$numThreads $rtsopts -RTS  >> "$benchpath/x-Results/Sud-$numThreads" 2>&1
          done
    done
 
@@ -109,7 +109,7 @@ echo CCHR
                  do
 		    for program in "Sudoku" "Gcd" "Unionfind" "Blockworld" "Prime"
 		      do
-                      $echo /usr/bin/time $benchpath/7-CCHR/$program t$numThreads +RTS -N$numThreads $rtsopts -RTS  >> "$benchpath/x-Results/CCHR-$program-$numThreads" 2>&1
+                      $echo $benchpath/7-CCHR/$program t$numThreads +RTS -N$numThreads $rtsopts -RTS  >> "$benchpath/x-Results/CCHR-$program-$numThreads" 2>&1
 		      done
 		  done
    done
@@ -120,7 +120,7 @@ echo SPI
              do
               for((i=1;$i<=$runs;i=$(($i+1))));
                    do
-                        $echo /usr/bin/time $benchpath/8-spi/parallel/Main $benchpath/8-spi/examples/Chemical/hcl.spi +RTS -N$numThreads -H200M $rtsopts -RTS  >> "$benchpath/x-Results/spi-$numThreads" 2>&1
+                        $echo $benchpath/8-spi/parallel/Main $benchpath/8-spi/examples/Chemical/hcl.spi +RTS -N$numThreads -H200M $rtsopts -RTS  >> "$benchpath/x-Results/spi-$numThreads" 2>&1
                    done
              done
 

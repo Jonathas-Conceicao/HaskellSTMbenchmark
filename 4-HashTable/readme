@@ -1,5 +1,0 @@
-to run:
-
-./Main "#ops" "keysrange" "#threads" "#runs" +RTS -Nx -H200M etc...
-
-

@@ -37,6 +37,7 @@ import Prelude
 import Control.Monad
 import CCHR.Control.Fix
 import CCHR.Control.Trans
+import Control.Applicative
 
 -- ----------------------------------------------------------------------------
 -- class MonadReader
@@ -56,12 +57,12 @@ asks f = do
 -- ----------------------------------------------------------------------------
 -- The partially applied function type is a simple reader monad
 
-instance Functor ((->) r) where
-	fmap = (.)
+--instance Functor ((->) r) where
+--	fmap = (.)
 
-instance Monad ((->) r) where
-	return  = const
-	m >>= k = \r -> k (m r) r
+--instance Monad ((->) r) where
+--	return  = const
+--	m >>= k = \r -> k (m r) r
 
 instance MonadFix ((->) r) where
 	mfix f = \r -> let a = f a r in a
@@ -79,8 +80,12 @@ instance Functor (Reader r) where
 	fmap f m = Reader $ \r -> f (runReader m r)
 
 instance Monad (Reader r) where
-	return a = Reader $ \_ -> a
+	-- return a = Reader $ \_ -> a
 	m >>= k  = Reader $ \r -> runReader (k (runReader m r)) r
+
+instance Applicative (Reader r) where
+	pure a = Reader $ \_ -> a
+	(<*>) = ap
 
 instance MonadFix (Reader r) where
 	mfix f = Reader $ \r -> let a = runReader (f a) r in a
@@ -108,15 +113,24 @@ instance (Monad m) => Functor (ReaderT r m) where
 		return (f a)
 
 instance (Monad m) => Monad (ReaderT r m) where
-	return a = ReaderT $ \_ -> return a
+	--return a = ReaderT $ \_ -> return a
 	m >>= k  = ReaderT $ \r -> do
 		a <- runReaderT m r
 		runReaderT (k a) r
 	fail msg = ReaderT $ \_ -> fail msg
 
+instance (Monad m) => Applicative (ReaderT r m) where
+	pure a = ReaderT $ \_ -> return a
+	(<*>) = ap
+
+
 instance (MonadPlus m) => MonadPlus (ReaderT r m) where
 	mzero       = ReaderT $ \_ -> mzero
 	m `mplus` n = ReaderT $ \r -> runReaderT m r `mplus` runReaderT n r
+
+instance (MonadPlus m) => Alternative (ReaderT r m) where
+	(<|>) = mplus
+	empty = mzero
 
 instance (MonadFix m) => MonadFix (ReaderT r m) where
 	mfix f = ReaderT $ \r -> mfix $ \a -> runReaderT (f a) r

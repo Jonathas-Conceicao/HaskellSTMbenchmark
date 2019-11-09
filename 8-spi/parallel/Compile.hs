@@ -4,6 +4,7 @@ import Soup
 import Chan	( Chan, mkChan, GblId, mkDelayChan, mkGblId, 
                   firstUnique, uniqueFrom, nextUnique )
 import Parser
+import Control.Monad
 import qualified Data.Map as Map
 
 ---------------------------
@@ -283,9 +284,16 @@ lookupOcc s
 newtype CM a = CM { unCM :: CmCtxt -> a }
 
 instance Monad CM where
-  return x = CM (\cxt -> x)
+  --return x = CM (\cxt -> x)
   (CM m) >>= k = CM (\cxt -> unCM (k (m cxt)) cxt)
   fail s = CM (\cxt -> error (s ++ showStack (cm_stack cxt)))
+
+instance Applicative CM where
+	pure x = CM (\ctx -> x)
+	f1 <*> f2 = f1 >>= \v1 -> f2 >>= (pure . v1)
+
+instance Functor CM where
+	fmap = liftM
 
 initCM :: CmCtxt -> CM a -> a
 initCM cxt (CM m) = m cxt

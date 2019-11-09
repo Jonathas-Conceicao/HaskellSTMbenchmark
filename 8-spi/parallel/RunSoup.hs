@@ -8,7 +8,7 @@ import Chan ( GblId, mkGblId,
 	      addRates, infiniteRate, isInfiniteRate, nextUnique )
 
 import qualified Data.Map as Map
-import Control.Monad	( foldM )
+import Control.Monad	( foldM, liftM )
 import System.IO.Unsafe	( unsafePerformIO )
 import Data.IORef
 import qualified System.Random as Random
@@ -272,9 +272,16 @@ initM do_it soup
     })
 
 instance Monad M where
-  return x  = M (\env -> return x)
+  --return x  = M (\env -> return x)
   M m >>= k = M (\env -> do { r <- m env; unM (k r) env })
 
+instance Applicative M where
+	pure x = M (\env -> return x)
+	--(<*>) = ap
+	f1 <*> f2 = f1 >>= \v1 -> f2 >>= (pure . v1)
+
+instance Functor M where
+	fmap = liftM
 --------------------
 -- Debugging
 

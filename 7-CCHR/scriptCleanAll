@@ -1,0 +1,14 @@
+#!/bin/bash
+rm *.o
+rm *.hi
+rm CCHR/*.o 
+rm CCHR/*.hi
+rm CCHRCompiler/*.o
+rm CCHRCompiler/*.hi
+rm CCHR/Control/*.o
+rm CCHR/Control/*.hi
+rm Sudoku
+rm Unionfind
+rm Prime
+rm Gcd
+rm Blockworld

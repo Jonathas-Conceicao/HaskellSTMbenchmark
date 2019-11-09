@@ -19,10 +19,10 @@ module CCHR.CCHRCommandLine where
 
 import CCHR.CCHRSolver
 
-import Char
-import List
-import IO
-import System
+import Data.Char
+import Data.List
+import System.IO
+import System.Environment
 import System.Time
 
 --------------------------------------------------------------
