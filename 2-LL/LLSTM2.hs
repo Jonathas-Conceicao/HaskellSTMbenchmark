@@ -5,7 +5,7 @@ import Control.Concurrent.STM.TVar
 -- import Control.Concurrent
 import GHC.Conc
 import Control.Exception
-import System.Random 
+import System.Random
 -- import System.CPUTime
 -- import Text.Printf
 
@@ -98,11 +98,11 @@ findListCountSteps Node {val = curElem, nextN = tnextN} element steps = do
 
 
 findList :: ListNode -> Int -> STM(Bool, Int)
-findList list element = findListCountSteps list element 1 
+findList list element = findListCountSteps list element 1
 
 
 createEmptyList :: STM (ListNode)
-createEmptyList	= do 
+createEmptyList	= do
 	listStartTrans <- newTVar Nil
 	return Start {nextN = listStartTrans}
 
@@ -132,40 +132,3 @@ createSampleList listOfInts = do
 	myTList <- newTVar myList
 	mapM_ (insertListNode myTList) listOfInts
 	return myList
-
-{-
- createSampleList :: [Int] -> IO ListNode
- createSampleList listOfInts = do { myList <- atomically createEmptyList 
- 				; myTList <- newTVarIO myList
-			   	; insertEachAtomically myTList listOfInts
-				; myList <- atomically (readTVar myTList)
-			   	; return myList}
-
--}
-{-
-
- insertNTimes :: ListNode -> Int -> Int -> IO()
- insertNTimes _ _ 0 = return ()
- insertNTimes aList maxNumber counter = do {rnd <- randomRIO (1::Int, maxNumber)
-				             ; atomically (insertListNode aList rnd)
-					     ; insertNTimes aList maxNumber (counter - 1)
-                                            } 
-
- deleteNTimes :: ListNode -> Int -> Int -> IO()
- deleteNTimes _ _ 0 = return ()
- deleteNTimes aList maxNumber counter = do { rnd <- randomRIO (1::Int, maxNumber)
-					     ;  atomically (deleteListNode aList rnd)
-		                             ; deleteNTimes aList maxNumber (counter - 1)
-                                            } 
-
- deleteAndInsertNTimes :: ListNode -> Int -> Int -> IO()
- deleteAndInsertNTimes _ _ 0 = return ()
- deleteAndInsertNTimes aList maxNumber counter = do { rnd <- randomRIO (1::Int, maxNumber)
-					     		;  rnd2 <- randomRIO (1::Int, maxNumber)
-					     		;  atomically (do{deleteListNode aList rnd
-					     		;                 ; insertListNode aList rnd2})
-		                             		; deleteAndInsertNTimes aList maxNumber (counter - 1)
-                                            	     } 
-
--}
-

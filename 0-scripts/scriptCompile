@@ -1,7 +1,5 @@
 #!/bin/bash
 
-#ghcpath="/media/rmduarte/rmduarte/Repositorios/ghc_modify_86/inplace/bin/ghc-stage2"
-#ghcpath="/home/rmduarte/Repositorios/ghc-tstate/inplace/bin/ghc-stage2"
 ghcpath="ghc"
 cd ..
 benchpath=`pwd`
