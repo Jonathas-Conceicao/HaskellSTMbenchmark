@@ -1,9 +1,9 @@
 #!/bin/bash
 
-ghcpath="/usr/local/bin"
-benchpath="/home/rio/HaskellSTMbenchmark"
+ghcpath="/usr/bin"
+benchpath="/home/jonathas/Workspace/HaskellSTMbenchmark"
 
-ghcoptions="--make -O -threaded -fglasgow-exts"
+ghcoptions="--make -O -threaded -fglasgow-exts -fno-warn-tabs"
 
 #clean .o's,  prepare directories
 
@@ -53,19 +53,19 @@ $ghcpath/ghc Main.hs $ghcoptions
 
 echo TCache
 cd $benchpath/5-TCache
-$ghcpath/ghc Main.hs --make -threaded -fglasgow-exts #does not work with -O. nor with ghc-6.10
+$ghcpath/ghc Main.hs --make -threaded -fglasgow-exts -fno-warn-tabs #does not work with -O. nor with ghc-6.10
 
 echo Sud
 cd $benchpath/6-ParallelSudoku
 $ghcpath/ghc Main.hs $ghcoptions
 
-echo CCHR
-cd $benchpath/7-CCHR
-for program in "Sudoku" "Gcd" "Unionfind" "Blockworld" "Prime"
-  do
-    $ghcpath/ghc $program.hs --make -threaded -fglasgow-exts # -O does not work here either
-  done
+# echo CCHR
+# cd $benchpath/7-CCHR
+# for program in "Sudoku" "Gcd" "Unionfind" "Blockworld" "Prime"
+#   do
+#     $ghcpath/ghc $program.hs --make -threaded -fglasgow-exts # -O does not work here either
+#   done
 
-echo SPI
-cd $benchpath/8-spi/parallel/
-$ghcpath/ghc Main.hs $ghcoptions
+# echo SPI
+# cd $benchpath/8-spi/parallel/
+# $ghcpath/ghc Main.hs $ghcoptions

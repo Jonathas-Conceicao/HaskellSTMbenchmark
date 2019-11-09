@@ -1,7 +1,7 @@
 #!/bin/bash
 # Execution script
 
-benchpath="/home/rio/HaskellSTMbenchmark"
+benchpath="/home/jonathas/Workspace/HaskellSTMbenchmark"
 rtsopts="-H200M -K200M"
 # the results path is /x-Results in benchmark dir
 cores="1 2" # 4 8  
@@ -102,25 +102,25 @@ echo Sud
    done
 
 #CCHR
-echo CCHR
-          for numThreads in $cores
-            do
-              for((i=1;$i<=$runs;i=$(($i+1))));
-                 do
-		    for program in "Sudoku" "Gcd" "Unionfind" "Blockworld" "Prime"
-		      do
-                      $echo /usr/bin/time $benchpath/7-CCHR/$program t$numThreads +RTS -N$numThreads $rtsopts -RTS  >> "$benchpath/x-Results/CCHR-$program-$numThreads" 2>&1
-		      done
-		  done
-   done
+# echo CCHR
+#           for numThreads in $cores
+#             do
+#               for((i=1;$i<=$runs;i=$(($i+1))));
+#                  do
+# 		    for program in "Sudoku" "Gcd" "Unionfind" "Blockworld" "Prime"
+# 		      do
+#                       $echo /usr/bin/time $benchpath/7-CCHR/$program t$numThreads +RTS -N$numThreads $rtsopts -RTS  >> "$benchpath/x-Results/CCHR-$program-$numThreads" 2>&1
+# 		      done
+# 		  done
+#    done
 
-#SPI
-echo SPI
-          for numThreads in $cores
-             do
-              for((i=1;$i<=$runs;i=$(($i+1))));
-                   do
-                        $echo /usr/bin/time $benchpath/8-spi/parallel/Main $benchpath/8-spi/examples/Chemical/hcl.spi +RTS -N$numThreads -H200M $rtsopts -RTS  >> "$benchpath/x-Results/spi-$numThreads" 2>&1
-                   done
-             done
+# #SPI
+# echo SPI
+#           for numThreads in $cores
+#              do
+#               for((i=1;$i<=$runs;i=$(($i+1))));
+#                    do
+#                         $echo /usr/bin/time $benchpath/8-spi/parallel/Main $benchpath/8-spi/examples/Chemical/hcl.spi +RTS -N$numThreads -H200M $rtsopts -RTS  >> "$benchpath/x-Results/spi-$numThreads" 2>&1
+#                    done
+#              done
 

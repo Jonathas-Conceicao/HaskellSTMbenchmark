@@ -46,7 +46,7 @@ import Control.Monad (liftM, replicateM,when)
 import Control.Concurrent.STM
 import Control.Concurrent.STM.TVar
 import qualified Data.List as List (partition, lookup, length, concatMap, map)
-import Foreign (unsafePerformIO)
+-- import Foreign (unsafePerformIO)
 
 data THT k v = MkTHT
     { slots       :: Array Int (TVar [(k, v)])

@@ -87,7 +87,7 @@ import GHC.Conc
 import Control.Exception as Exception
 import Control.Concurrent
 import Control.Monad(when)
-import Data.HashTable as H
+import Data.HashTable.ST.Basic as H hiding (mapM_)
 import Data.IORef
 import System.IO
 import System.IO.Unsafe
@@ -124,7 +124,7 @@ class IResource a where
 	-- (NOTE: reads and writes can't collide, so they-- Not really needed since no write is done while read
 	-- must be strict, not lazy )
 	readResource :: a->IO (Maybe a)
-        readResource x=handleJust Exception.ioErrors (handle x) $ do 
+        readResource x=handleJust Exception.ioError (handle x) $ do 
              s::String <- readFileStrict  filename  --`debug` ("read "++filename)
              return $ Just $ deserialize s
              where
@@ -138,7 +138,7 @@ class IResource a where
               | otherwise= error $ "unspecified error: " ++ show e
 
 	writeResource:: a->IO()
-        writeResource x= handleJust Exception.ioErrors (handle x) $ writeFile filename (serialize x) --`debug` ("write "++filename)
+        writeResource x= handleJust Exception.ioError (handle x) $ writeFile filename (serialize x) --`debug` ("write "++filename)
              where
              filename= (defPath x ++ keyResource x)
              handle :: a -> IOError -> IO ()
@@ -153,7 +153,7 @@ class IResource a where
                | otherwise= error $ show e
                
 	delResource:: a->IO()
-	delResource x= handleJust Exception.ioErrors (handle x) $ removeFile $ defPath x ++ keyResource x
+	delResource x= handleJust Exception.ioError (handle x) $ removeFile $ defPath x ++ keyResource x
              where
              handle :: a -> IOError -> IO ()
              handle x e
@@ -168,7 +168,7 @@ type AccessTime= Integer
 type ModifTime = Integer
 
 type Block a=  (TVar a,AccessTime,ModifTime)
-type Ht a= HashTable String (Block a)
+data Ht a= HashTable String (Block a)
 -- contains the hastable, number of items, last sync time
 type Cache a= IORef (Ht a, Integer)
 data CheckBlockFlags= AddToHash | NoAddToHash | MaxTime
@@ -264,13 +264,13 @@ takeBlocks rs cache addToHash=  mapM (checkBlock cache addToHash)  rs
                            NoAddToHash -> return $ Just tvr
                            AddToHash   -> do 
                                     ti  <-  timeInteger
-			            H.update cache keyr (tvr, ti, 0) -- accesed, not modified
+			            H.insert cache keyr (tvr, ti, 0) -- accesed, not modified
                                     return $ Just tvr
                                     
                            MaxTime -> do
                                     ti  <-  timeInteger
                                     let maxtime= ti + 1000000000
-                                    H.update cache keyr (tvr, maxtime, maxtime) -- accesed, not modified
+                                    H.insert cache keyr (tvr, maxtime, maxtime) -- accesed, not modified
                                     return $ Just tvr
                                     
                                     
@@ -293,13 +293,13 @@ releaseBlocks rs cache = mapM_ checkBlock  rs
 	case c of
 	    Nothing   -> do tvr <- newTVar r  
 	                    ti  <- unsafeIOToSTM timeInteger
-			    unsafeIOToSTM $ H.update cache keyr (tvr, ti, ti ) -- accesed and modified XXX
+			    unsafeIOToSTM $ H.insert cache keyr (tvr, ti, ti ) -- accesed and modified XXX
 								 
 				
 	    Just(tvr,_,tm)  ->do  writeTVar tvr r
 	                          ti  <- unsafeIOToSTM timeInteger
 	                          let t=  max ti tm
-				  unsafeIOToSTM $ H.update cache keyr (tvr ,t,t)
+				  unsafeIOToSTM $ H.insert cache keyr (tvr ,t,t)
 									
 					
 						
@@ -330,7 +330,7 @@ deleteResources rs=do
 delListFromHash  hash l= do{mapM (delete hash) l; return()}
 
 updateListToHash hash kv= do{mapM (update1 hash) kv; return()}where
-	update1 h (k,v)= update h k v
+	update1 h (k,v)= insert h k v
 
 -----------------------clear, sync cache-------------
 clearSyncCacheProc ::(IResource a)=> Cache a->Int->(Integer -> Integer->Integer->Bool)->Int->IO ThreadId

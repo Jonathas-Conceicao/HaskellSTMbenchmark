@@ -4,10 +4,10 @@
  import Control.Concurrent
  import GHC.Conc
  import Control.Monad
- import Random 
+ import System.Random as Random
  import System.Time
  import Text.Printf
- import System
+ import System.Environment
 
 {-
  main :: IO()

@@ -5,7 +5,7 @@
  import Control.Monad
  import System.Time
  import Text.Printf
- import System
+ import System.Environment
 
  createThread :: Int -> TVar Int -> MVar Int -> IO ThreadId
  createThread numOps tValue mvar =

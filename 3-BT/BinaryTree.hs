@@ -4,7 +4,7 @@
  import Control.Concurrent.STM.TVar
  import GHC.Conc
  import Control.Exception
- import Random 
+ import System.Random as Random
  import System.IO.Unsafe
 
  data Tree

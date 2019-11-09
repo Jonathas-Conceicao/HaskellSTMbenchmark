@@ -3,7 +3,7 @@
  module BinaryTree where
  import GHC.IOBase
  import Control.Exception
- import Random 
+ import System.Random as Random
  import System.IO.Unsafe
 
  data Tree

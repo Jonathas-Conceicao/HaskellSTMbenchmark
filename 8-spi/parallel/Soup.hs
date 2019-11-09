@@ -40,7 +40,7 @@ import qualified Data.Map as Map
 import Data.Maybe	( fromJust )
 import System.IO	( Handle, hPutStrLn, stderr )
 import Data.List	( intersperse, partition )
-import qualified Random
+import qualified System.Random as Random
 
 debugOn = False
 

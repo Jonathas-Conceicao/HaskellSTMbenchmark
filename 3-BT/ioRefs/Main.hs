@@ -4,7 +4,7 @@
  import Control.Concurrent
  import GHC.IOBase
  import Control.Monad
- import Random 
+ import System.Random as Random
  import System.Time
  import Text.Printf
  import System

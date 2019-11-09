@@ -5,7 +5,7 @@
 -- import Control.Concurrent
  import GHC.Conc
  import Control.Exception
- import Random 
+ import System.Random as Random
 -- import System.CPUTime
 -- import Text.Printf
 
