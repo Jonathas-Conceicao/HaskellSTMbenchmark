@@ -1,0 +1,221 @@
+cabal-version:       2.4
+
+name:                HaskellSTMbenchmark
+version:             0.1.0.0
+-- synopsis:
+-- description:
+-- bug-reports:
+license:             NONE
+-- license-file:        LICENSE
+author:              Jonathas-Conceicao
+maintainer:          jadoliveira@inf.ufpel.edu.br
+-- copyright:
+-- category:
+extra-source-files:  CHANGELOG.md, README
+
+executable SharedInt
+  main-is:             Main.hs
+  -- other-modules:
+  -- other-extensions:
+  build-depends:       base
+  hs-source-dirs:      1-SI
+  default-language:    Haskell2010
+  ghc-options: -rtsopts
+               -threaded
+               -O
+
+executable LinkedList
+  main-is:             Main.hs
+  other-modules:       LLSTM2
+  -- other-extensions:
+  build-depends:       base
+                     , random
+                     , stm
+  hs-source-dirs:      2-LL
+  default-language:    Haskell2010
+  ghc-options: -rtsopts
+               -threaded
+               -O
+               -fno-warn-tabs
+
+executable BinaryTree
+  main-is:             Main.hs
+  other-modules:       BinaryTree
+  -- other-extensions:
+  build-depends:       base
+                     , random
+                     , stm
+                     , old-time
+  hs-source-dirs:      3-BT
+  default-language:    Haskell2010
+  ghc-options: -rtsopts
+               -threaded
+               -O
+               -fno-warn-tabs
+
+executable HashTable
+  main-is:             Main.hs
+  other-modules:       Data.Hashable
+                       Data.THash
+                       Data.THash.THT
+  -- other-extensions:
+  build-depends:       base
+                     , array
+                     , random
+                     , stm
+                     , old-time
+  hs-source-dirs:      4-HT
+  default-language:    Haskell2010
+  ghc-options: -rtsopts
+               -threaded
+               -O
+               -fno-warn-tabs
+               -fglasgow-exts
+
+-- FIXME TCache doesn't build
+-- executable TCache
+--   main-is:             Main.hs
+--   other-modules:       Data.TCache
+--   -- other-extensions:
+--   build-depends:       base
+--                      , stm
+--                      , old-time
+--                      , directoriy
+--   hs-source-dirs:      5-TCache
+--   default-language:    Haskell2010
+--   ghc-options: -rtsopts
+--                -threaded
+--                -O
+--                -fno-warn-tabs
+
+executable ParallelSudoku
+  main-is:             Main.hs
+  -- other-modules:
+  -- other-extensions:
+  build-depends:       base
+                     , stm
+                     , old-time
+  hs-source-dirs:      6-ParallelSudoku
+  default-language:    Haskell2010
+  ghc-options: -rtsopts
+               -threaded
+               -O
+               -fno-warn-tabs
+
+executable CCHR_Sudoku
+  main-is:             Sudoku.hs
+  other-modules:       CCHR.CCHRCommandLine
+                       CCHR.CCHRCore
+                       CCHR.CCHRSolver
+                       CCHR.CCHRStore
+                       CCHR.Control.Fix
+                       CCHR.Control.Reader
+                       CCHR.Control.State
+                       CCHR.Control.Trans
+                       CCHR.Control.Writer
+                       CCHR.TList
+  -- other-extensions:
+  build-depends:       base
+                     , stm
+                     , old-time
+  hs-source-dirs:      7-CCHR
+  default-language:    Haskell2010
+  ghc-options: -rtsopts
+               -threaded
+               -O
+               -fno-warn-tabs
+
+executable CCHR_Gcd
+  main-is:             Gcd.hs
+  other-modules:       CCHR.CCHRCommandLine
+                       CCHR.CCHRCore
+                       CCHR.CCHRSolver
+                       CCHR.CCHRStore
+                       CCHR.Control.Fix
+                       CCHR.Control.Reader
+                       CCHR.Control.State
+                       CCHR.Control.Trans
+                       CCHR.Control.Writer
+                       CCHR.TList
+  -- other-extensions:
+  build-depends:       base
+                     , stm
+                     , old-time
+  hs-source-dirs:      7-CCHR
+  default-language:    Haskell2010
+  ghc-options: -rtsopts
+               -threaded
+               -O
+               -fno-warn-tabs
+
+executable CCHR_Unionfind
+  main-is:             Unionfind.hs
+  other-modules:       CCHR.CCHRCommandLine
+                       CCHR.CCHRCore
+                       CCHR.CCHRSolver
+                       CCHR.CCHRStore
+                       CCHR.Control.Fix
+                       CCHR.Control.Reader
+                       CCHR.Control.State
+                       CCHR.Control.Trans
+                       CCHR.Control.Writer
+                       CCHR.TList
+  -- other-extensions:
+  build-depends:       base
+                     , stm
+                     , old-time
+  hs-source-dirs:      7-CCHR
+  default-language:    Haskell2010
+  ghc-options: -rtsopts
+               -threaded
+               -O
+               -fno-warn-tabs
+
+executable CCHR_Blockworld
+  main-is:             Blockworld.hs
+  other-modules:       CCHR.CCHRCommandLine
+                       CCHR.CCHRCore
+                       CCHR.CCHRSolver
+                       CCHR.CCHRStore
+                       CCHR.Control.Fix
+                       CCHR.Control.Reader
+                       CCHR.Control.State
+                       CCHR.Control.Trans
+                       CCHR.Control.Writer
+                       CCHR.TList
+  -- other-extensions:
+  build-depends:       base
+                     , stm
+                     , old-time
+  hs-source-dirs:      7-CCHR
+  default-language:    Haskell2010
+  ghc-options: -rtsopts
+               -threaded
+               -O
+               -fno-warn-tabs
+
+executable CCHR_Prime
+  main-is:             Prime.hs
+  other-modules: CCHR.CCHRCommandLine
+                 CCHR.CCHRCore
+                 CCHR.CCHRSolver
+                 CCHR.CCHRStore
+                 CCHR.Control.Fix
+                 CCHR.Control.Reader
+                 CCHR.Control.State
+                 CCHR.Control.Trans
+                 CCHR.Control.Writer
+                 CCHR.TList
+  -- other-extensions:
+  build-depends:       base
+                     , stm
+                     , containers
+  hs-source-dirs:      7-CCHR
+  default-language:    Haskell2010
+  ghc-options: -rtsopts
+               -threaded
+               -O
+               -fno-warn-tabs
+               -XMultiParamTypeClasses
+               -XFunctionalDependencies
+               -XFlexibleInstances
