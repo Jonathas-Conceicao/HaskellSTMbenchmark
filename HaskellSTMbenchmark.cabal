@@ -31,6 +31,23 @@ executable LinkedList
   build-depends:       base
                      , random
                      , stm
+                     , old-time
+  hs-source-dirs:      2-LL
+  default-language:    Haskell2010
+  ghc-options: -rtsopts
+               -threaded
+               -O
+               -fno-warn-tabs
+
+executable IOSTM_LinkedList
+  main-is:             MainIOSTM.hs
+  other-modules:       LLIOSTM
+  -- other-extensions:
+  build-depends:       base
+                     , atomic-primops
+                     , random
+                     , old-time
+                     , stm
   hs-source-dirs:      2-LL
   default-language:    Haskell2010
   ghc-options: -rtsopts

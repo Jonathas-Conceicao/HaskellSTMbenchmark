@@ -1,6 +1,6 @@
 module Main where
 
-import qualified LLSTM2 as LL
+import qualified LLIOSTM as LL
 import Control.Concurrent
 import GHC.Conc
 import Control.Monad
@@ -15,7 +15,7 @@ foo :: (a, b, c, d, e) -> b
 foo (_, b, _, _, _) = b
 
 
-createThread :: Int -> TVar LL.ListNode -> Int -> MVar Int -> IO ThreadId
+createThread :: Int -> TVar (LL.ListHandle Int) -> Int -> MVar Int -> IO ThreadId
 createThread numOps tList maxNumber mvar = forkIO $ do
 	callNTimes numOps $ do
 		rnd1 <- randomRIO (1::Int, maxNumber)
@@ -24,7 +24,7 @@ createThread numOps tList maxNumber mvar = forkIO $ do
 		atomically $ LL.insertListNode tList rnd2
 	putMVar mvar 1
 
-createThreads :: Int -> Int -> TVar LL.ListNode -> Int -> [MVar Int] -> IO()
+createThreads :: Int -> Int -> TVar (LL.ListHandle Int) -> Int -> [MVar Int] -> IO()
 createThreads n numOps tList maxNumber mvars = mapM_ (createThread numOps tList maxNumber) mvars
 
 main1 :: Int -> Int -> Int -> IO () 
