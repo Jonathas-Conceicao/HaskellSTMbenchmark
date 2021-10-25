@@ -20,3 +20,10 @@ cabal.project.local
 cabal.project.local~
 .HTF/
 .ghc.environment.*
+
+# Emacs swap files
+.\#*
+\#*
+
+results/*
+Rplots.pdf
