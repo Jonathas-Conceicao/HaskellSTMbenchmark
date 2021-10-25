@@ -20,21 +20,45 @@ fi
 
 # 2-LL
 
-echo "Generating data for 2-LL"
-mkdir -p $RESULT_DIR/2-LL
+# echo "Generating data for 2-LL"
+# mkdir -p $RESULT_DIR/2-LL
 
-for bin in "IOSTM_LinkedList" "LinkedList"; do
-  for numOp in "200" "2000"; do # "20000" "200000"; do
-    for listLength in "500" "1000" "1500"; do
-      for numThreads in "2" "4" "8"; do
-        ops=$(($numOp/$numThreads))
-        echo "$bin op$numOp ln$listLength t$numThreads $NUMBER_OF_OPERATIONS"
-        cabal -v0 v2-run $bin $ops $listLength $numThreads $NUMBER_OF_OPERATIONS \
-              > $RESULT_DIR/2-LL/${bin}_op${numOp}_ln${listLength}_t${numThreads}.csv
+# for bin in "IOSTM_LinkedList" "LinkedList"; do
+#   for numOp in "200" "2000"; do # "20000" "200000"; do
+#     for listLength in "500" "1000" "1500"; do
+#       for numThreads in "2" "4" "8"; do
+#         ops=$(($numOp/$numThreads))
+#         echo "$bin op$numOp ln$listLength t$numThreads $NUMBER_OF_OPERATIONS"
+#         cabal -v0 v2-run $bin $ops $listLength $numThreads $NUMBER_OF_OPERATIONS \
+#               > $RESULT_DIR/2-LL/${bin}_op${numOp}_ln${listLength}_t${numThreads}.csv
+#       done
+#     done
+#   done
+# done
+
+echo "Generating data for X-Set"
+current_result_dir=$RESULT_DIR/X-Set
+mkdir -p $current_result_dir
+
+for bin in "IOSTM_Set" "STM_Set"; do
+  for w_heavy in "0" "1"; do
+    for num_threads in "1" "2" "3" "4" "5" "6" "7" "8"; do
+      echo "$bin w$w_heavy t$num_threads"
+      values_range=6000
+      num_operations=6000
+      list_len=2500
+      # Remove current output before amending to it
+      rm -f $current_result_dir/${bin}_w${w_heavy}_t${num_threads}.csv
+      for ((i=0;i<$NUMBER_OF_OPERATIONS;i++)); do
+        cabal -v0 v2-run $bin $values_range $list_len $num_operations $w_heavy $num_threads \
+              -- +RTS -N$num_threads \
+              >> $current_result_dir/${bin}_w${w_heavy}_t${num_threads}.csv
       done
     done
   done
 done
+
+
 
 #SharedInt
 

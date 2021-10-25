@@ -55,6 +55,41 @@ executable IOSTM_LinkedList
                -O
                -fno-warn-tabs
 
+executable STM_Set
+  main-is:             TestSet.hs
+  other-modules:       STMSet
+  -- other-extensions:
+  build-depends:       base
+                     , random
+                     , stm
+                     , time
+  hs-source-dirs:      X-Set
+  default-language:    Haskell2010
+  ghc-options: -rtsopts
+               -threaded
+               -O
+
+executable IOSTM_Set
+  main-is:             TestSetIOSTM.hs
+  other-modules:       STMSet
+                     , CASList
+                     , AbstractLock
+                     , HashTable.HashSet
+  -- other-extensions:
+  build-depends:       base
+                     , array
+                     , atomic-primops
+                     , random
+                     , stm
+                     , time
+  hs-source-dirs:      X-Set
+  default-language:    Haskell2010
+  ghc-options: -rtsopts
+               -threaded
+               -O
+
+
+
 executable BinaryTree
   main-is:             Main.hs
   other-modules:       BinaryTree
