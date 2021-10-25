@@ -1,8 +1,8 @@
 packages: ./HaskellSTMbenchmark.cabal
 keep-going: true
 shared: true
-with-compiler: /usr/bin/ghc
--- with-compiler: /home/jonathas/Workspace/ghc/inplace/bin/ghc-stage2
+-- with-compiler: /usr/bin/ghc
+with-compiler: /home/jonathas/Repositories/tcc/ghc/inplace/bin/ghc-stage2
 constraints: base >= 3
            , array >= 0.5
            , atomic-primops >= 0.8
