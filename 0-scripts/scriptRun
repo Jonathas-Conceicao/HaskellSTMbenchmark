@@ -36,6 +36,21 @@ fi
 #   done
 # done
 
+echo "Generating data for 1-SI"
+current_result_dir=$RESULT_DIR/1-SI
+mkdir -p $current_result_dir
+
+for bin in "IOSTM_UniqueID" "STM_UniqueID"; do
+  for ops in "1000" "10000" "100000"; do
+    for num_threads in "1" "2" "3" "4" "5" "6" "7" "8"; do
+      echo "$bin op$ops t$num_threads"
+      cabal -v0 v2-run $bin $ops $num_threads $NUMBER_OF_OPERATIONS \
+              -- +RTS -N$num_threads \
+              > $current_result_dir/${bin}_op${ops}_t${num_threads}.csv
+    done
+  done
+done
+
 echo "Generating data for X-Set"
 current_result_dir=$RESULT_DIR/X-Set
 mkdir -p $current_result_dir
@@ -57,18 +72,3 @@ for bin in "IOSTM_Set" "STM_Set"; do
     done
   done
 done
-
-
-
-#SharedInt
-
-#        for numThreads in $cores
-   #             do
-   #            for((i=1;$i<=$runs;i=$(($i+1))));
-   #                 do
-   #                     ops=$(($numOp/$numThreads))
-   #                     $echo $benchpath/1-SI/Main $ops $numThreads 1 +RTS -N$numThreads $rtsopts -RTS  >> "$benchpath/x-Results/SI-$numThreads" 2>&1
-   #              done
-   #       done
-   # done
-

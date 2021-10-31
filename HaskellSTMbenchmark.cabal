@@ -13,16 +13,33 @@ maintainer:          jadoliveira@inf.ufpel.edu.br
 -- category:
 extra-source-files:  CHANGELOG.md, README
 
-executable SharedInt
+executable STM_UniqueID
   main-is:             Main.hs
   -- other-modules:
   -- other-extensions:
   build-depends:       base
+                     , stm
+                     , old-time
   hs-source-dirs:      1-SI
   default-language:    Haskell2010
   ghc-options: -rtsopts
                -threaded
                -O
+
+executable IOSTM_UniqueID
+  main-is:             IOSTM_Main.hs
+  -- other-modules:
+  -- other-extensions:
+  build-depends:       base
+                     , stm
+                     , old-time
+                     , atomic-primops
+  hs-source-dirs:      1-SI
+  default-language:    Haskell2010
+  ghc-options: -rtsopts
+               -threaded
+               -O
+
 
 executable LinkedList
   main-is:             Main.hs

@@ -6,33 +6,53 @@ import Control.Monad
 import System.Time
 import Text.Printf
 import System.Environment
+import Control.Monad.IO.Class (MonadIO(..))
+import GHC.IO (IO(..))
+import Data.IORef
+import Data.Atomics
+import GHC.Conc.Sync
 
-createThread :: Int -> TVar Int -> MVar Int -> IO ThreadId
-createThread numOps tValue mvar = forkIO $ do
+instance MonadIO IOSTM where
+    liftIO (IO a) = IOSTM a
+
+atomCAS :: Eq a => IORef a -> a -> a -> IO Bool
+atomCAS ptr old new =
+   atomicModifyIORefCAS ptr (\ cur -> if cur == old
+                                   then (new, True)
+                                   else (cur, False))
+
+
+getID ::  IORef Int -> IO Int
+getID idger = do
+  v <- readIORef idger
+  ok <- atomCAS idger v (v+1)
+  if ok then return (v+1) else getID idger
+
+
+createThread :: Int -> IORef Int -> MVar Int -> IO ThreadId
+createThread numOps ioValue mvar = forkIO $ do
 	callNTimes numOps $ do
-		atomically $ do
-			theValue <- readTVar tValue
-			writeTVar tValue (theValue + 1)
-			return ()
+		atomically $ performIO $ do
+                  liftIO $ getID $ ioValue
+                  return ()
 	putMVar mvar 1
 
-
-createThreads :: Int -> Int -> TVar Int -> [MVar Int] -> IO()
-createThreads n numOps tVar mvars = mapM_ (createThread numOps tVar) mvars
+createThreads :: Int -> Int -> IORef Int -> [MVar Int] -> IO()
+createThreads n numOps ioVar mvars = mapM_ (createThread numOps ioVar) mvars
 
 
 main1 :: Int -> Int -> IO ()
 main1 numops numThreads = do
 	-- putStrLn ("Thread: " ++ show (numThreads) ++ " Ops: " ++ show(numops))
-	theSharedInt <- newTVarIO 0
+	theSharedInt <- newIORef 0
 	timeStart <- getClockTime
 	mvars <- replicateM numThreads newEmptyMVar
 	-- print(numops)
 	threads <- createThreads numThreads numops theSharedInt mvars
 	mapM_ takeMVar mvars
 	timeEnd <- getClockTime
-	theSharedIntValue <- atomically $ readTVar theSharedInt
-	-- putStrLn $ show theSharedIntValue
+	theSharedIntValue <- readIORef theSharedInt
+	putStrLn $ show theSharedIntValue
 -- dumpSTMStats
 	let diff = normalizeTimeDiff $ diffClockTimes timeEnd timeStart
 	print ((((fromIntegral(tdPicosec diff))/(10^12))) + (fromIntegral((tdSec diff) + (60 * (tdMin diff)) + (3600 * (tdHour diff)))))
