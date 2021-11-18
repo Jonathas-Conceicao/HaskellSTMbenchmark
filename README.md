@@ -1,3 +1,12 @@
+# A fork of the Haskell STM Benchmark
+
+This repository contains the Haskell STM Benchmark updated to run on newer versions of the GHC.
+
+Be sure to check the other branches for variations done on this project.
+
+## Original readme from the Haskell STM Benchmark
+
+```
 *************************************************************
 ***** The Haskell STM Benchmark version 0.1		*****
 ***** as gathered by Nehir Sonmez & Cristian Perfumo 	*****
@@ -26,3 +35,4 @@ The Haskell STM Benchmark brings together a collection of Haskell programs writt
 - C. Perfumo, N. Sonmez, S. Stipic, A. Cristal, O. S. Unsal, T. Harris and M. Valero, “The Limits of Software Transactional Memory (STM): Dissecting Haskell STM Applications on a Many-Core Environment”, in Computing Frontiers 2008, Ischia, Italy, May 5-7, 2008.
 - C. Perfumo, N. Sonmez, O. S. Unsal, A. Cristal, M. Valero, and T. Harris, “Dissecting Transactional Executions in Haskell”, TRANSACT 07, Portland, Oregon, USA, August 2007.
 - N. Sonmez, C. Perfumo, S. Stipic, A. Cristal, O. S. Unsal and M. Valero, “UnreadTVar: Extending Haskell Software Transactional Memory for Performance”, in Eighth Symposium on Trends in Functional Programming (TFP 2007), New York, USA, April 2007.
+```
