@@ -4,6 +4,18 @@ This repository contains the Haskell STM Benchmark updated to run on newer versi
 
 Be sure to check the other branches for variations done on this project.
 
+## About the IOSTM
+
+Some of the examples here have been tweeked to also have a implementation using Transactional Boosting,
+over STM Haskell made possible by the IOSTM extension.
+
+The IOSTM implementation can be found on [this fork](https://github.com/Jonathas-Conceicao/ghc/tree/handlers-implementation-8.6)
+
+The current updated examples are:
+
+- [1-SI](1-SI)
+- [X-Set](X-Set) an added example using linked list to construct a Set structure
+
 ## Original readme from the Haskell STM Benchmark
 
 ```
